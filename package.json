@@ -5,6 +5,14 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "mikro-orm": {
+    "configPaths": [
+      "./src/database/mikro-orm.config.ts",
+      "./dist/database/mikro-orm.config.js"
+    ],
+    "preferTs": true,
+    "tsLoader": "ts-node"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -45,11 +53,13 @@
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "uuidv7": "^1.2.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
+    "@mikro-orm/cli": "^7.0.11",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",

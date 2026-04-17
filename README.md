@@ -1,98 +1,152 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# bananApp — Back
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS + MikroORM v7 + PostgreSQL 16 + Redis 7. Corre dentro de Docker.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Requisitos
 
-## Description
+- Docker Desktop o Docker Engine + Docker Compose plugin
+- Puertos libres en el host: **3000** (API), **5432** (Postgres), **6380** (Redis)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+## Primer arranque (solo la primera vez)
 
 ```bash
-$ npm install
+cd saas/back
+cp .env.example .env
+# Edita .env con tus valores (ver sección de variables de entorno abajo)
+sudo docker compose up --build
 ```
 
-## Compile and run the project
+## Levantar los contenedores (arranques siguientes)
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cd saas/back
+sudo docker compose up
 ```
 
-## Run tests
+En background:
+```bash
+sudo docker compose up -d
+```
+
+Ver logs en tiempo real:
+```bash
+sudo docker compose logs -f api
+```
+
+## Detener los contenedores
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+sudo docker compose down
 ```
 
-## Deployment
+Borrar también la base de datos (volúmenes):
+```bash
+sudo docker compose down -v
+```
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+## Variables de entorno
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Copia `.env.example` a `.env` y completa:
+
+```env
+NODE_ENV=development
+PORT=3000
+
+# PostgreSQL
+DB_HOST=db
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=tu_password_aqui
+DB_NAME=bananapp
+
+# JWT — usá strings aleatorios largos (mínimo 32 caracteres)
+JWT_ACCESS_SECRET=cambia_esto_por_un_secreto_largo_y_aleatorio
+JWT_REFRESH_SECRET=cambia_esto_por_otro_secreto_diferente
+JWT_ACCESS_EXPIRES_IN=3600
+JWT_REFRESH_EXPIRES_IN=2592000
+
+# Redis
+REDIS_URL=redis://redis:6379
+```
+
+> `DB_HOST=db` y `redis://redis` usan los nombres de servicio de Docker Compose.
+> No los cambies a menos que corras la API fuera de Docker.
+
+## Verificar que está funcionando
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+curl http://localhost:3000/api/v1/health
+# Respuesta esperada: {"status":"ok"}
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Login del superadmin (creado automáticamente al primer arranque)
 
-## Resources
+```bash
+curl -X POST http://localhost:3000/api/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"thonyiuci@gmail.com","password":"canamas365"}'
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+## Estructura del proyecto
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```
+src/
+├── app.module.ts               # Módulo raíz
+├── database/
+│   ├── mikro-orm.config.ts     # Configuración ORM (UnderscoreNamingStrategy)
+│   ├── migration-runner.service.ts  # Crea/actualiza schema al arrancar (OnModuleInit)
+│   └── seed-superadmin.service.ts   # Crea el superadmin si no existe (OnApplicationBootstrap)
+└── modules/
+    ├── shared/
+    │   ├── base.entity.ts      # BaseProperties: id (uuidv7), timestamps, deletedAt
+    │   ├── exceptions/         # DomainException y subclases (errores en español)
+    │   ├── guards/             # JwtAuthGuard
+    │   └── interceptors/       # ResponseFormatInterceptor → { success, data, error }
+    └── auth/
+        ├── commands/login.handler.ts
+        └── http/auth.controller.ts
+```
 
-## Support
+## Convenciones de arquitectura
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+- **Hexagonal-lite:** `domain/` → `application/` → `infrastructure/`
+- **Un handler por archivo** — `commands/login.handler.ts`, `queries/get-user.handler.ts`
+- **Entidades** con `defineEntity` + `p.*` (MikroORM v7 — sin decoradores legacy)
+- **UUID v7** para todos los PKs — package `uuidv7`
+- **Responses:** siempre `{ success, data, error }` via `ResponseFormatInterceptor`
+- **Errores:** nunca expone SQL — `GlobalExceptionFilter` traduce todo a español
 
-## Stay in touch
+## Comportamiento en el primer arranque
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+1. `MigrationRunnerService` (`OnModuleInit`) — crea el schema en Postgres
+2. `SeedSuperadminService` (`OnApplicationBootstrap`) — crea el superadmin:
+   - Email: `thonyiuci@gmail.com`
+   - Contraseña: `canamas365`
 
-## License
+## Puertos expuestos
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+| Servicio   | Host              | Contenedor |
+|------------|-------------------|------------|
+| API        | `0.0.0.0:3000`    | 3000       |
+| Debug      | `0.0.0.0:9229`    | 9229       |
+| PostgreSQL | `127.0.0.1:5432`  | 5432       |
+| Redis      | `127.0.0.1:6380`  | 6379       |
+
+> Postgres y Redis solo son accesibles desde `localhost` — no desde la red local.
+> La API (puerto 3000) sí es accesible desde el celular en la misma red.
+
+## Comandos útiles
+
+```bash
+# Ver estado de contenedores
+sudo docker compose ps
+
+# Acceder a la base de datos
+sudo docker compose exec db psql -U postgres -d bananapp
+
+# Reiniciar solo la API (sin tocar DB ni Redis)
+sudo docker compose restart api
+
+# Logs de un servicio específico
+sudo docker compose logs -f db
+```
