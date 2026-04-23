@@ -8,13 +8,22 @@ export class MigrationRunnerService implements OnModuleInit {
   constructor(private readonly orm: MikroORM) {}
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Running schema update...');
-    // updateSchema is safe for dev: creates tables that don't exist, adds missing columns
-    // For production use migrations instead
-    // orm.schema returns ISchemaGenerator (base interface). The concrete PostgreSQL
-    // implementation exposes update() — cast is safe, method verified at runtime.
-    const generator = this.orm.schema as unknown as { update: () => Promise<void> };
-    await generator.update();
-    this.logger.log('Schema up to date.');
+    this.logger.log('Running pending migrations...');
+    try {
+      const migrator = this.orm.migrator;
+      const pending = await migrator.getPending();
+
+      if (pending.length === 0) {
+        this.logger.log('No pending migrations.');
+        return;
+      }
+
+      this.logger.log(`Applying ${pending.length} migration(s)...`);
+      await migrator.up();
+      this.logger.log('Migrations applied successfully.');
+    } catch (error) {
+      this.logger.error('Migration failed', error);
+      throw error;
+    }
   }
 }
