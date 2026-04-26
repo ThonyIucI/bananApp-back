@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { defineConfig, UnderscoreNamingStrategy } from '@mikro-orm/postgresql';
-import { Migrator } from '@mikro-orm/migrations';
+import { Migrator, TSMigrationGenerator } from '@mikro-orm/migrations';
 import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 
 import { User } from '../modules/users/domain/user.entity';
@@ -14,7 +14,7 @@ import { Bundling } from '../modules/bundlings/domain/bundling.entity';
 import { RibbonCalendar } from '../modules/ribbon-calendars/domain/ribbon-calendar.entity';
 import { Sector } from '../modules/sectors/domain/sector.entity';
 import { Plot } from '../modules/plots/domain/plot.entity';
-import { InternalMark } from '../modules/plots/domain/internal-mark.entity';
+import { SubPlot } from '../modules/plots/domain/sub-plot.entity';
 
 export default defineConfig({
   host: process.env.DB_HOST ?? '127.0.0.1',
@@ -26,16 +26,16 @@ export default defineConfig({
   entities: [
     User,
     Cooperative,
-    UserCooperative,
-    UserCooperativeRole,
     Role,
     Permission,
+    UserCooperative,
+    UserCooperativeRole,
     RolePermission,
-    Bundling,
-    RibbonCalendar,
     Sector,
     Plot,
-    InternalMark,
+    SubPlot,
+    Bundling,
+    RibbonCalendar,
   ],
 
   metadataProvider: TsMorphMetadataProvider,
@@ -46,6 +46,20 @@ export default defineConfig({
     pathTs: 'src/database/migrations',
     glob: '!(*.d).{js,ts}',
     dropTables: false,
+    transactional: true,
+    // ESTO ES LO QUE BUSCAS:
+    snapshot: true,
+    emit: 'ts',
+    generator: class extends TSMigrationGenerator {
+      /**
+       * Esto obliga al generador a usar saltos de línea y tabulaciones
+       */
+      override createStatement(sql: string, padLeft: number): string {
+        // Formateo básico: saltos de línea después de las comas en el CREATE TABLE
+        const formattedSql = sql.replace(/, /g, ',\n    ');
+        return super.createStatement(formattedSql, padLeft);
+      }
+    },
   },
 
   extensions: [Migrator],

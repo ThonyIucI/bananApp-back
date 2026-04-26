@@ -17,7 +17,7 @@ export class SeedSuperadminService implements OnApplicationBootstrap {
       if (exists) return;
 
       const superadmin = await User.make({
-        firstName: 'Thony',
+        firstName: 'Admin',
         lastName: 'Admin',
         email: SUPERADMIN_EMAIL,
         password: SUPERADMIN_PASSWORD,
