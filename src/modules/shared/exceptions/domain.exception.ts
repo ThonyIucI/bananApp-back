@@ -9,8 +9,8 @@ export class DomainException extends Error {
 }
 
 export class NotFoundException extends DomainException {
-  constructor(entity: string, identifier: string) {
-    super(`${entity} no encontrado: ${identifier}`, 'NOT_FOUND');
+  constructor(message = '') {
+    super(message ?? `elemento no encontrado`, 'NOT_FOUND');
   }
 }
 

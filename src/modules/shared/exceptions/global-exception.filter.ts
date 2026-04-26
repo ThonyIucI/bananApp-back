@@ -58,7 +58,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   ): { status: number; body: ErrorResponse } {
     // ── Domain exceptions (our own, always safe to show) ──────────────────
     if (exception instanceof NotFoundException) {
-      return this.build(HttpStatus.NOT_FOUND, exception.message, exception.code);
+      return this.build(
+        HttpStatus.NOT_FOUND,
+        exception.message,
+        exception.code,
+      );
     }
 
     if (exception instanceof ConflictException) {
@@ -66,11 +70,19 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     }
 
     if (exception instanceof UnauthorizedException) {
-      return this.build(HttpStatus.UNAUTHORIZED, exception.message, exception.code);
+      return this.build(
+        HttpStatus.UNAUTHORIZED,
+        exception.message,
+        exception.code,
+      );
     }
 
     if (exception instanceof ForbiddenException) {
-      return this.build(HttpStatus.FORBIDDEN, exception.message, exception.code);
+      return this.build(
+        HttpStatus.FORBIDDEN,
+        exception.message,
+        exception.code,
+      );
     }
 
     if (exception instanceof ValidationException) {
@@ -117,7 +129,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       const message =
         typeof res === 'string'
           ? res
-          : (res as { message?: string | string[] }).message ?? exception.message;
+          : ((res as { message?: string | string[] }).message ??
+            exception.message);
 
       // class-validator validation errors come as array
       const readable = Array.isArray(message) ? message[0] : message;
@@ -140,7 +153,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   ): { status: number; body: ErrorResponse } {
     return {
       status,
-      body: { success: false, data: null, error, code, ...(field ? { field } : {}) },
+      body: {
+        success: false,
+        data: null,
+        error,
+        code,
+        ...(field ? { field } : {}),
+      },
     };
   }
 
