@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { User } from '../../users/domain/user.entity';
-import { LoginCommand, LoginResult } from './login.command';
+import { LoginCommand, LoginResult } from '../commands/login.command';
 import {
   UnauthorizedException,
   BusinessRuleException,

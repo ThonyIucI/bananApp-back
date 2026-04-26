@@ -29,7 +29,7 @@ services:
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
-      POSTGRES_DB: ${DB_NAME:-bananero_dev}
+      POSTGRES_DB: ${DB_NAME:-cultivapp_dev}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
