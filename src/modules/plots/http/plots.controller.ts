@@ -58,10 +58,7 @@ export class PlotsController {
   @Get(':id')
   @RequirePermission('plot_read')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
-    const data = await this.findByIdHandler.execute(id);
-    console.log('this.findByIdHandler.execute(id);', data);
-
-    return data;
+    return this.findByIdHandler.execute(id);
   }
 
   @Patch(':id')

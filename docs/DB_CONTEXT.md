@@ -6,7 +6,7 @@
 > Conventions:
 > - All PKs: UUID v7
 > - All tables: snake_case (via UnderscoreNamingStrategy)
-> - All entities: soft delete via `deleted_at` (nullable datetime)
+> - Most entities: soft delete via `deleted_at` (nullable datetime) — pivot tables without business lifecycle omit it
 > - Timestamps: `created_at`, `updated_at` auto-managed by MikroORM hooks
 
 ---
@@ -16,9 +16,14 @@
 - [cooperatives](#cooperatives)
 - [roles](#roles)
 - [permissions](#permissions)
-- [role_permissions](#role_permissions)
-- [user_cooperatives](#user_cooperatives)
-- [user_cooperative_roles](#user_cooperative_roles)
+- [role_permission](#role_permission)
+- [user_cooperative](#user_cooperative)
+- [user_cooperative_role](#user_cooperative_role)
+- [sectors](#sectors)
+- [plots](#plots)
+- [sub_plots](#sub_plots)
+- [ribbon_calendars](#ribbon_calendars)
+- [bundlings](#bundlings)
 
 ---
 
@@ -102,18 +107,17 @@
 
 ---
 
-## `role_permissions`
+## `role_permission`
 
 Pivot: which permissions each role has.
+
+> ⚠️ Tabla pivot pura — no tiene `deleted_at` (sin lifecycle de negocio).
 
 | Column         | Type        | Nullable | Constraints                    |
 |----------------|-------------|----------|-------------------------------|
 | `id`           | uuid        | NO       | PK                             |
 | `role_id`      | uuid        | NO       | FK → roles.id CASCADE DELETE   |
 | `permission_id`| uuid        | NO       | FK → permissions.id CASCADE    |
-| `created_at`   | timestamptz | NO       |                                |
-| `updated_at`   | timestamptz | NO       |                                |
-| `deleted_at`   | timestamptz | YES      |                                |
 
 **UNIQUE:** (role_id, permission_id)
 
@@ -130,7 +134,7 @@ Pivot: which permissions each role has.
 
 ---
 
-## `user_cooperatives`
+## `user_cooperative`
 
 Membership: a user belongs to a cooperative.
 
@@ -149,31 +153,124 @@ Membership: a user belongs to a cooperative.
 
 ---
 
-## `user_cooperative_roles`
+## `user_cooperative_role`
 
 Which roles a membership has within a cooperative.
 
-| Column                | Type        | Nullable | Constraints                                   |
-|-----------------------|-------------|----------|----------------------------------------------|
-| `id`                  | uuid        | NO       | PK                                            |
-| `user_cooperative_id` | uuid        | NO       | FK → user_cooperatives.id CASCADE DELETE      |
-| `role_id`             | uuid        | NO       | FK → roles.id CASCADE DELETE                  |
-| `created_at`          | timestamptz | NO       |                                               |
-| `updated_at`          | timestamptz | NO       |                                               |
-| `deleted_at`          | timestamptz | YES      |                                               |
+| Column                | Type        | Nullable | Constraints                                  |
+|-----------------------|-------------|----------|---------------------------------------------|
+| `id`                  | uuid        | NO       | PK                                           |
+| `user_cooperative_id` | uuid        | NO       | FK → user_cooperative.id CASCADE DELETE      |
+| `role_id`             | uuid        | NO       | FK → roles.id CASCADE DELETE                 |
+| `created_at`          | timestamptz | NO       |                                              |
+| `updated_at`          | timestamptz | NO       |                                              |
+| `deleted_at`          | timestamptz | YES      |                                              |
 
 **UNIQUE:** (user_cooperative_id, role_id)
 
 ---
 
-## Planned entities (next sprints)
+## `sectors`
 
-| Entity          | Table              | Sprint |
-|-----------------|--------------------|--------|
-| Sector          | `sectors`          | 3      |
-| Plot            | `plots`            | 3      |
-| SubPlot    | `sub_plots`   | 3      |
-| EnfundadorPlot  | `enfundador_plots` | 3      |
-| RibbonCalendar  | `ribbon_calendars` | 4      |
-| Bundling        | `bundlings`        | 4      |
-| Sanction        | `sanctions`        | 5      |
+Agrupación geográfica de parcelas dentro de una cooperativa.
+
+| Column           | Type         | Nullable | Default | Constraints                         |
+|------------------|-------------|----------|---------|-------------------------------------|
+| `id`             | uuid         | NO       | uuidv7  | PK                                  |
+| `name`           | varchar(100) | NO       |         |                                     |
+| `cooperative_id` | uuid         | NO       |         | FK → cooperatives.id CASCADE DELETE |
+| `created_at`     | timestamptz  | NO       | now()   |                                     |
+| `updated_at`     | timestamptz  | NO       | now()   |                                     |
+| `deleted_at`     | timestamptz  | YES      | NULL    | Soft delete                         |
+
+---
+
+## `plots`
+
+Parcela agrícola perteneciente a un sector.
+
+| Column           | Type           | Nullable | Default | Constraints                       |
+|------------------|---------------|----------|---------|-----------------------------------|
+| `id`             | uuid           | NO       | uuidv7  | PK                                |
+| `name`           | varchar(200)   | NO       |         |                                   |
+| `sector_id`      | uuid           | NO       |         | FK → sectors.id CASCADE DELETE    |
+| `owner_user_id`  | uuid           | NO       |         | FK → users.id CASCADE DELETE      |
+| `worker_user_id` | uuid           | YES      | NULL    | FK → users.id SET NULL            |
+| `area_hectares`  | numeric(8,4)   | NO       |         |                                   |
+| `cadastral_code` | varchar(50)    | YES      | NULL    |                                   |
+| `created_at`     | timestamptz    | NO       | now()   |                                   |
+| `updated_at`     | timestamptz    | NO       | now()   |                                   |
+| `deleted_at`     | timestamptz    | YES      | NULL    | Soft delete                       |
+
+---
+
+## `sub_plots`
+
+Subparcela dentro de una parcela, con responsable opcional.
+
+| Column                | Type         | Nullable | Default | Constraints                    |
+|-----------------------|-------------|----------|---------|--------------------------------|
+| `id`                  | uuid         | NO       | uuidv7  | PK                             |
+| `name`                | varchar(200) | NO       |         |                                |
+| `plot_id`             | uuid         | NO       |         | FK → plots.id CASCADE DELETE   |
+| `responsible_user_id` | uuid         | YES      | NULL    | FK → users.id SET NULL         |
+| `area_hectares`       | numeric(8,4) | NO       |         |                                |
+| `created_at`          | timestamptz  | NO       | now()   |                                |
+| `updated_at`          | timestamptz  | NO       | now()   |                                |
+| `deleted_at`          | timestamptz  | YES      | NULL    | Soft delete                    |
+
+---
+
+## `ribbon_calendars`
+
+Calendario anual de colores de cinta por cooperativa.
+
+| Column              | Type        | Nullable | Default | Constraints                         |
+|---------------------|-------------|----------|---------|-------------------------------------|
+| `id`                | uuid        | NO       | uuidv7  | PK                                  |
+| `cooperative_id`    | uuid        | NO       |         | FK → cooperatives.id CASCADE DELETE |
+| `year`              | integer     | NO       |         |                                     |
+| `start_color_index` | integer     | NO       | 0       | Índice en RIBBON_COLORS_CYCLE        |
+| `created_at`        | timestamptz | NO       | now()   |                                     |
+| `updated_at`        | timestamptz | NO       | now()   |                                     |
+| `deleted_at`        | timestamptz | YES      | NULL    | Soft delete                         |
+
+---
+
+## `bundlings`
+
+Registro de enfunde: cuántas fundas colocó un enfundador en una parcela.
+
+| Column                | Type         | Nullable | Default | Constraints                            |
+|-----------------------|-------------|----------|---------|----------------------------------------|
+| `id`                  | uuid         | NO       | uuidv7  | PK                                     |
+| `plot_id`             | uuid         | NO       |         | FK → plots.id CASCADE DELETE           |
+| `enfundador_user_id`  | uuid         | NO       |         | FK → users.id CASCADE DELETE           |
+| `quantity`            | integer      | NO       |         |                                        |
+| `ribbon_calendar_id`  | uuid         | YES      | NULL    | FK → ribbon_calendars.id SET NULL      |
+| `ribbon_color_free`   | varchar(50)  | YES      | NULL    | Color libre cuando no hay calendario   |
+| `bundled_at`          | timestamptz  | NO       |         | Fecha/hora real del enfunde            |
+| `notes`               | varchar(500) | YES      | NULL    |                                        |
+| `local_uuid`          | uuid         | NO       |         | UNIQUE — generado en cliente (offline) |
+| `synced_at`           | timestamptz  | YES      | NULL    | Null si aún no sincronizado            |
+| `created_at`          | timestamptz  | NO       | now()   |                                        |
+| `updated_at`          | timestamptz  | NO       | now()   |                                        |
+| `deleted_at`          | timestamptz  | YES      | NULL    | Soft delete                            |
+
+**UNIQUE:** `local_uuid` — garantiza idempotencia en sincronización offline.
+
+---
+
+## Planned entities (próximos sprints)
+
+| Entity     | Table        | Sprint | Notas                                           |
+|------------|--------------|--------|-------------------------------------------------|
+| UserPlot   | `user_plot`  | MVP2   | Acceso operativo N:M usuario ↔ parcela (este sprint) |
+| Sanction   | `sanctions`  | 5      |                                                 |
+| Harvest    | `harvests`   | 5      |                                                 |
+
+---
+
+## Deuda técnica
+
+- Existen tablas residuales `user` y `cooperative` (singular) en el snapshot de Postgres sin migración que las cree. Son artefactos huérfanos. **No eliminar en MVP2**; documentado en `planning/mvp2/observaciones.md`.

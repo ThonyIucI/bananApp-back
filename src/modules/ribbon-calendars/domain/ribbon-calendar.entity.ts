@@ -32,8 +32,6 @@ export interface WeekEntry {
   week: number;
   color: RibbonColor;
 }
-console.log('asd');
-
 const RibbonCalendarSchema = defineEntity({
   name: 'RibbonCalendar',
   tableName: 'ribbon_calendars',

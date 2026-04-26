@@ -83,8 +83,6 @@ export class UpdatePlotHandler {
           0,
         );
         if (subPlotsArea !== plot.areaHectares) {
-          console.log(subPlotsArea, plot.areaHectares);
-
           throw new ConflictException(
             'La suma de áreas de los sub-parcelas no coincide con la área total de la parcela',
           );

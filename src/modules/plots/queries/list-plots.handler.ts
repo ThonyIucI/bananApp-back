@@ -22,8 +22,6 @@ export class ListPlotsHandler {
       limit,
       offset,
     });
-    console.log(items);
-
     return {
       items: items.map((plot) => PlotMapper.toListDto(plot)),
       total,

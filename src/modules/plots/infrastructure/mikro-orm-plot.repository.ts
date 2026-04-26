@@ -55,8 +55,6 @@ export class MikroOrmPlotRepository extends IPlotRepository {
         'subPlots.id',
       ] as const,
     });
-    console.log({ items });
-
     return { items: items as unknown as Plot[], total };
   }
 
