@@ -3,6 +3,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { ResponseFormatInterceptor } from './modules/shared/interceptors/response-format.interceptor';
 import { GlobalExceptionFilter } from './modules/shared/exceptions/global-exception.filter';
+import { setDefaultResultOrder } from 'node:dns';
+setDefaultResultOrder('ipv4first');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
