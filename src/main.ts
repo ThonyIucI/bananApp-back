@@ -12,7 +12,8 @@ async function bootstrap() {
     process.env.CORS_ORIGINS ?? 'http://localhost:3000'
   ).split(',');
   app.enableCors({
-    origin: allowedOrigins,
+    // origin: allowedOrigins,
+    origin: '*',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
