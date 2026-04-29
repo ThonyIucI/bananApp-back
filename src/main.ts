@@ -33,8 +33,9 @@ async function bootstrap() {
 
   // Uniform response envelope: { success, data, error }
   app.useGlobalInterceptors(new ResponseFormatInterceptor());
-
-  await app.listen(process.env.PORT ?? 3001, '0.0.0.0');
+  const appPort = process.env.PORT ?? 3001;
+  console.log(`🚀 Application is running on: http://localhost:${appPort}`);
+  await app.listen(appPort, '0.0.0.0');
 }
 
 bootstrap().catch((err) => {
