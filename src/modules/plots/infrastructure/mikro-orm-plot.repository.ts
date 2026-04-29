@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Plot } from '../domain/plot.entity';
 import { IPlotRepository, PlotFilters } from '../domain/plot.repository';
+import { UserPlot } from '../domain/user-plot.entity';
 
 const PLOT_POPULATE = [
   'sector',
@@ -31,11 +32,21 @@ export class MikroOrmPlotRepository extends IPlotRepository {
 
     if (filters.sectorId) where['sector'] = { id: filters.sectorId };
     if (filters.ownerUserId) where['ownerUser'] = { id: filters.ownerUserId };
-    if (filters.workerUserId)
-      where['workerUser'] = { id: filters.workerUserId };
-    // cooperativeId overrides sectorId when both are present
+    if (filters.workerUserId) where['workerUser'] = { id: filters.workerUserId };
     if (filters.cooperativeId)
       where['sector'] = { cooperative: { id: filters.cooperativeId } };
+
+    if (filters.assignedUserId) {
+      const assignments = await this.em.find(UserPlot, {
+        user: { id: filters.assignedUserId },
+        unassignedAt: null,
+        deletedAt: null,
+      });
+      const plotIds = assignments.map(
+        (a) => (a.plot as unknown as { id: string }).id,
+      );
+      where['id'] = { $in: plotIds };
+    }
 
     const limit = filters.limit ?? 20;
     const offset = filters.offset ?? 0;
@@ -55,6 +66,7 @@ export class MikroOrmPlotRepository extends IPlotRepository {
         'subPlots.id',
       ] as const,
     });
+
     return { items: items as unknown as Plot[], total };
   }
 

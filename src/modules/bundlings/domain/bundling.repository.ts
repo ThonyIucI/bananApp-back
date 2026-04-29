@@ -2,6 +2,7 @@ import { Bundling } from './bundling.entity';
 
 export interface BundlingFilters {
   plotId?: string;
+  subPlotId?: string;
   enfundadorUserId?: string;
   cooperativeId?: string;
   from?: Date;

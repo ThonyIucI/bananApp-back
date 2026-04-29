@@ -19,6 +19,10 @@ export class ListBundlingsDto {
 
   @IsOptional()
   @IsUUID()
+  subPlotId?: string;
+
+  @IsOptional()
+  @IsUUID()
   cooperativeId?: string;
 
   @IsOptional()

@@ -16,7 +16,7 @@ export class MikroOrmBundlingRepository extends IBundlingRepository {
     return this.em.findOne(
       Bundling,
       { id, deletedAt: null },
-      { populate: ['plot', 'enfundadorUser', 'ribbonCalendar'] },
+      { populate: ['plot', 'subPlot', 'enfundadorUser', 'ribbonCalendar'] },
     );
   }
 
@@ -26,6 +26,7 @@ export class MikroOrmBundlingRepository extends IBundlingRepository {
     const where: Record<string, unknown> = { deletedAt: null };
 
     if (filters.plotId) where['plot'] = { id: filters.plotId };
+    if (filters.subPlotId) where['subPlot'] = { id: filters.subPlotId };
     if (filters.enfundadorUserId)
       where['enfundadorUser'] = { id: filters.enfundadorUserId };
     if (filters.cooperativeId)
@@ -43,7 +44,7 @@ export class MikroOrmBundlingRepository extends IBundlingRepository {
     const offset = filters.offset ?? 0;
 
     const [items, total] = await this.em.findAndCount(Bundling, where, {
-      populate: ['plot', 'enfundadorUser', 'ribbonCalendar'],
+      populate: ['plot', 'subPlot', 'enfundadorUser', 'ribbonCalendar'],
       orderBy: { bundledAt: 'DESC' },
       limit,
       offset,

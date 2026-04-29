@@ -1,4 +1,5 @@
 import {
+  Allow,
   IsDateString,
   IsInt,
   IsOptional,
@@ -29,6 +30,10 @@ export class CreateBundlingDto {
 
   @IsOptional()
   @IsUUID()
+  subPlotId?: string;
+
+  @IsOptional()
+  @IsUUID()
   ribbonCalendarId?: string;
 
   @IsOptional()
@@ -40,4 +45,7 @@ export class CreateBundlingDto {
   @IsString()
   @MaxLength(500)
   notes?: string;
+
+  @Allow()
+  cooperativeId?: string;
 }

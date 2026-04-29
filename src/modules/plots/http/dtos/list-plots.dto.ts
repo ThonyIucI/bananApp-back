@@ -19,6 +19,10 @@ export class ListPlotsDto {
   cooperativeId?: string;
 
   @IsOptional()
+  @IsUUID()
+  assignedUserId?: string;
+
+  @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
