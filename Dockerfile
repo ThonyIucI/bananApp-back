@@ -1,40 +1,28 @@
-# ─── Stage: deps ────────────────────────────────────────────────────────────
-FROM node:22-alpine AS deps
+# 1. Stage de construcción
+FROM node:22-alpine AS builder
 WORKDIR /app
+
+# Copiamos archivos de dependencias
 COPY package*.json ./
-# Instalamos todas las dependencias para poder buildear
 RUN npm ci
 
-# ─── Stage: build ────────────────────────────────────────────────────────────
-FROM node:22-alpine AS build
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Copiamos TODO el código y construimos
 COPY . .
-# Genera la carpeta dist
-RUN npm run build 
-# Limpia dependencias de desarrollo para que la imagen pese menos
-RUN npm prune --omit=dev 
+RUN npm run build
 
-# ─── Stage: production ───────────────────────────────────────────────────────
-FROM node:22-alpine AS production
+# 2. Stage de producción
+FROM node:22-alpine AS runner
 WORKDIR /app
-
-# Crear usuario seguro
-RUN addgroup -g 1001 -S app && adduser -S app -u 1001
-USER app
-
-COPY --from=build --chown=app:app /app/dist ./dist
-COPY --from=build --chown=app:app /app/node_modules ./node_modules
-COPY --from=build --chown=app:app /app/package.json ./
 
 ENV NODE_ENV=production
 
-# ¡IMPORTANTE! No hardcodear el puerto 3000 aquí. 
-# Railway inyecta la variable PORT.
-ENV PORT=8080 
+# Copiamos las dependencias y el build desde el stage anterior
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./
+
+# Railway asigna el puerto automáticamente
 EXPOSE 8080
 
-# Eliminamos el HEALTHCHECK del Dockerfile porque Railway tiene su propio 
-# sistema de Healthcheck en el Dashboard y suele entrar en conflicto.
-
+# Comando de ejecución
 CMD ["node", "dist/main.js"]
