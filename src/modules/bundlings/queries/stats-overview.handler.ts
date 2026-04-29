@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { APP_TIMEZONE } from '../../shared/constants/timezone';
 
 export interface StatsOverviewQuery {
   cooperativeId: string;
@@ -104,7 +105,8 @@ export class StatsOverviewHandler {
            JOIN sectors s ON s.id = p.sector_id
            WHERE s.cooperative_id = $1
              AND b.deleted_at IS NULL
-             AND date_trunc('week', b.bundled_at) = date_trunc('week', now())`,
+             AND date_trunc('week', b.bundled_at AT TIME ZONE '${APP_TIMEZONE}')
+               = date_trunc('week', now() AT TIME ZONE '${APP_TIMEZONE}')`,
         [cooperativeId],
       ),
       this.q<PeriodRow>(
@@ -114,7 +116,8 @@ export class StatsOverviewHandler {
            JOIN sectors s ON s.id = p.sector_id
            WHERE s.cooperative_id = $1
              AND b.deleted_at IS NULL
-             AND date_trunc('week', b.bundled_at) = date_trunc('week', now() - interval '1 week')`,
+             AND date_trunc('week', b.bundled_at AT TIME ZONE '${APP_TIMEZONE}')
+               = date_trunc('week', (now() - interval '1 week') AT TIME ZONE '${APP_TIMEZONE}')`,
         [cooperativeId],
       ),
       this.q<PeriodRow>(
@@ -124,7 +127,8 @@ export class StatsOverviewHandler {
            JOIN sectors s ON s.id = p.sector_id
            WHERE s.cooperative_id = $1
              AND b.deleted_at IS NULL
-             AND date_trunc('month', b.bundled_at) = date_trunc('month', now())`,
+             AND date_trunc('month', b.bundled_at AT TIME ZONE '${APP_TIMEZONE}')
+               = date_trunc('month', now() AT TIME ZONE '${APP_TIMEZONE}')`,
         [cooperativeId],
       ),
       this.q<PeriodRow>(
@@ -134,7 +138,8 @@ export class StatsOverviewHandler {
            JOIN sectors s ON s.id = p.sector_id
            WHERE s.cooperative_id = $1
              AND b.deleted_at IS NULL
-             AND date_trunc('month', b.bundled_at) = date_trunc('month', now() - interval '1 month')`,
+             AND date_trunc('month', b.bundled_at AT TIME ZONE '${APP_TIMEZONE}')
+               = date_trunc('month', (now() - interval '1 month') AT TIME ZONE '${APP_TIMEZONE}')`,
         [cooperativeId],
       ),
       this.q<Last30Row>(

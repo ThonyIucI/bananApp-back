@@ -53,25 +53,27 @@ export class BundlingsController {
   @Post()
   @RequirePermission('bundling_create')
   @CooperativeScope('body')
-  async create(@Body() dto: CreateBundlingDto) {
-    try {
-      const data = await this.createHandler.execute({
-        plotId: dto.plotId,
-        enfundadorUserId: dto.enfundadorUserId,
-        quantity: dto.quantity,
-        bundledAt: new Date(dto.bundledAt),
-        localUuid: dto.localUuid,
-        subPlotId: dto.subPlotId,
-        ribbonCalendarId: dto.ribbonCalendarId,
-        ribbonColorFree: dto.ribbonColorFree,
-        notes: dto.notes,
-      });
-      console.log(data);
-
-      return data;
-    } catch (error) {
-      console.log(error);
-    }
+  create(@Body() dto: CreateBundlingDto) {
+    return this.createHandler.execute({
+      plotId: dto.plotId,
+      bundledAt: new Date(dto.bundledAt),
+      enfundadorUserId: dto.enfundadorUserId,
+      quantity: dto.quantity,
+      localUuid: dto.localUuid,
+      subPlotId: dto.subPlotId,
+      ribbonCalendarId: dto.ribbonCalendarId,
+      ribbonColorFree: dto.ribbonColorFree,
+      notes: dto.notes,
+      subPlotEntries: dto.subPlotEntries?.map((e) => ({
+        subPlotId: e.subPlotId,
+        enfundadorUserId: e.enfundadorUserId,
+        quantity: e.quantity,
+        localUuid: e.localUuid,
+        ribbonCalendarId: e.ribbonCalendarId,
+        ribbonColorFree: e.ribbonColorFree,
+        notes: e.notes,
+      })),
+    });
   }
 
   @Patch(':id')
@@ -106,6 +108,7 @@ export class BundlingsController {
   findAll(@Query() query: ListBundlingsDto) {
     return this.listHandler.execute({
       plotId: query.plotId,
+      plotIds: query.plotIds,
       subPlotId: query.subPlotId,
       enfundadorUserId: query.enfundadorUserId,
       cooperativeId: query.cooperativeId,
@@ -123,6 +126,7 @@ export class BundlingsController {
     return this.summaryHandler.execute({
       cooperativeId: query.cooperativeId,
       plotId: query.plotId,
+      plotIds: query.plotIds,
       enfundadorUserId: query.enfundadorUserId,
       from: query.from ? new Date(query.from) : undefined,
       to: query.to ? new Date(query.to) : undefined,

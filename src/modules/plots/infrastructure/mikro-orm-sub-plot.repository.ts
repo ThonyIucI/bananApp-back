@@ -25,6 +25,14 @@ export class MikroOrmSubPlotRepository extends ISubPlotRepository {
     );
   }
 
+  findByPlots(plotIds: string[]): Promise<SubPlot[]> {
+    return this.em.find(
+      SubPlot,
+      { plot: { id: { $in: plotIds } }, deletedAt: null },
+      { populate: ['responsibleUser'], orderBy: { name: 'ASC' } },
+    );
+  }
+
   async sumAreaByPlot(plotId: string): Promise<number> {
     const subPlots = await this.em.find(SubPlot, {
       plot: { id: plotId },

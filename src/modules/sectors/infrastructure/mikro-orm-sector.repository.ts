@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Sector } from '../domain/sector.entity';
-import { ISectorRepository } from '../domain/sector.repository';
+import { ISectorRepository, SectorFilters } from '../domain/sector.repository';
 
 @Injectable()
 export class MikroOrmSectorRepository extends ISectorRepository {
@@ -17,6 +17,32 @@ export class MikroOrmSectorRepository extends ISectorRepository {
     return this.em.find(
       Sector,
       { cooperative: { id: cooperativeId }, deletedAt: null },
+      { orderBy: { name: 'ASC' } },
+    );
+  }
+
+  async findAll(filters: SectorFilters): Promise<Sector[]> {
+    if (!filters.plotIds?.length) {
+      return this.findByCooperative(filters.cooperativeId);
+    }
+
+    // Subquery: return only sectors that contain at least one of the given plots
+    const rows = await this.em.execute<{ id: string }[]>(
+      `SELECT DISTINCT s.id
+       FROM sectors s
+       JOIN plots p ON p.sector_id = s.id AND p.deleted_at IS NULL
+       WHERE s.cooperative_id = $1
+         AND s.deleted_at IS NULL
+         AND p.id = ANY($2)`,
+      [filters.cooperativeId, filters.plotIds],
+    );
+
+    if (!rows.length) return [];
+
+    const ids = rows.map((r) => r.id);
+    return this.em.find(
+      Sector,
+      { id: { $in: ids }, deletedAt: null },
       { orderBy: { name: 'ASC' } },
     );
   }

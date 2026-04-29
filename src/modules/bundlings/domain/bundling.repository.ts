@@ -2,6 +2,8 @@ import { Bundling } from './bundling.entity';
 
 export interface BundlingFilters {
   plotId?: string;
+  /** Filter by multiple plot IDs (takes precedence over plotId when both are present). */
+  plotIds?: string[];
   subPlotId?: string;
   enfundadorUserId?: string;
   cooperativeId?: string;

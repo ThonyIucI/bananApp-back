@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsDateString,
   IsInt,
   IsOptional,
@@ -6,12 +7,19 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export class ListBundlingsDto {
   @IsOptional()
   @IsUUID()
   plotId?: string;
+
+  /** Filter by multiple plot IDs. Supports repeated query: ?plotIds=a&plotIds=b */
+  @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : value ? [value] : undefined))
+  @IsArray()
+  @IsUUID('all', { each: true })
+  plotIds?: string[];
 
   @IsOptional()
   @IsUUID()

@@ -25,14 +25,15 @@ export class MikroOrmBundlingRepository extends IBundlingRepository {
   ): Promise<{ items: Bundling[]; total: number }> {
     const where: Record<string, unknown> = { deletedAt: null };
 
-    if (filters.plotId) where['plot'] = { id: filters.plotId };
+    const plotFilter: Record<string, unknown> = {};
+    if (filters.cooperativeId) plotFilter['sector'] = { cooperative: { id: filters.cooperativeId } };
+    if (filters.plotIds?.length) plotFilter['id'] = { $in: filters.plotIds };
+    else if (filters.plotId) plotFilter['id'] = filters.plotId;
+    if (Object.keys(plotFilter).length) where['plot'] = plotFilter;
+
     if (filters.subPlotId) where['subPlot'] = { id: filters.subPlotId };
     if (filters.enfundadorUserId)
       where['enfundadorUser'] = { id: filters.enfundadorUserId };
-    if (filters.cooperativeId)
-      where['plot'] = {
-        sector: { cooperative: { id: filters.cooperativeId } },
-      };
     if (filters.from || filters.to) {
       const dateFilter: Record<string, Date> = {};
       if (filters.from) dateFilter['$gte'] = filters.from;
