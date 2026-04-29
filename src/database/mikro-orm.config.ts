@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import { defineConfig, UnderscoreNamingStrategy } from '@mikro-orm/postgresql';
 import { Migrator, TSMigrationGenerator } from '@mikro-orm/migrations';
-import { MetadataProvider } from '@mikro-orm/core';
+import { TsMorphMetadataProvider } from '@mikro-orm/reflection';
 
 import { User } from '../modules/users/domain/user.entity';
 import { Cooperative } from '../modules/cooperatives/domain/cooperative.entity';
@@ -38,7 +38,7 @@ export default defineConfig({
     RibbonCalendar,
   ],
 
-  metadataProvider: MetadataProvider,
+  metadataProvider: TsMorphMetadataProvider,
   namingStrategy: UnderscoreNamingStrategy,
 
   migrations: {
