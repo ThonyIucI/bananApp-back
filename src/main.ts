@@ -36,6 +36,7 @@ async function bootstrap() {
   const appPort = process.env.PORT ?? 3001;
   console.log(`🚀 Application is running on port: ${appPort}`);
   await app.listen(appPort, '0.0.0.0');
+  console.log('✅ EL SERVIDOR ESTÁ ABIERTO Y LISTO'); // Si no ves esto en los logs de Railway, la app se quedó trabada antes de abrir el puerto.
 }
 
 bootstrap().catch((err) => {
