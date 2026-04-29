@@ -3,6 +3,8 @@ import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { ResponseFormatInterceptor } from './modules/shared/interceptors/response-format.interceptor';
 import { GlobalExceptionFilter } from './modules/shared/exceptions/global-exception.filter';
+// import { setDefaultResultOrder } from 'node:dns';
+// setDefaultResultOrder('ipv4first');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -31,8 +33,10 @@ async function bootstrap() {
 
   // Uniform response envelope: { success, data, error }
   app.useGlobalInterceptors(new ResponseFormatInterceptor());
-
-  await app.listen(process.env.PORT ?? 3001);
+  const appPort = process.env.PORT ?? 3001;
+  console.log(`🚀 Application is running on port: ${appPort}`);
+  await app.listen(appPort, '0.0.0.0');
+  console.log('✅ EL SERVIDOR ESTÁ ABIERTO Y LISTO'); // Si no ves esto en los logs de Railway, la app se quedó trabada antes de abrir el puerto.
 }
 
 bootstrap().catch((err) => {

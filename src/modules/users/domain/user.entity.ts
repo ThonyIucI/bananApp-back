@@ -36,9 +36,9 @@ export class User extends UserSchema.class {
     dni?: string;
   }): Promise<User> {
     const user = new User();
-    user.firstName = props.firstName.trim();
-    user.lastName = props.lastName.trim();
-    user.email = props.email.trim().toLowerCase();
+    user.firstName = props.firstName?.trim();
+    user.lastName = props.lastName?.trim();
+    user.email = props.email?.trim().toLowerCase();
     user.passwordHash = await bcrypt.hash(props.password, BCRYPT_ROUNDS);
     user.dni = props.dni?.trim() ?? null;
     user.isActive = true;
@@ -56,10 +56,10 @@ export class User extends UserSchema.class {
     isActive?: boolean;
     mustChangePassword?: boolean;
   }): void {
-    if (props.firstName !== undefined) this.firstName = props.firstName.trim();
-    if (props.lastName !== undefined) this.lastName = props.lastName.trim();
+    if (props.firstName !== undefined) this.firstName = props.firstName?.trim();
+    if (props.lastName !== undefined) this.lastName = props.lastName?.trim();
     if (props.email !== undefined)
-      this.email = props.email.trim().toLowerCase();
+      this.email = props.email?.trim().toLowerCase();
     if (props.dni !== undefined) this.dni = props.dni?.trim() ?? null;
     if (props.isActive !== undefined) this.isActive = props.isActive;
     if (props.mustChangePassword !== undefined)
@@ -68,7 +68,7 @@ export class User extends UserSchema.class {
   }
 
   get fullName(): string {
-    return `${this.firstName} ${this.lastName}`.trim();
+    return `${this.firstName} ${this.lastName}`?.trim();
   }
 
   isLocked(): boolean {
