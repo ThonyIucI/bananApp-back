@@ -1,15 +1,24 @@
-import { IsArray, ArrayNotEmpty, IsUUID, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsArray,
+  ArrayNotEmpty,
+  IsUUID,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 export class AssignUserPlotsDto {
   @IsArray()
   @ArrayNotEmpty()
-  @IsUUID('4', { each: true })
   plotIds: string[];
 
   @IsOptional()
   @IsString()
   @MaxLength(300)
   notes?: string;
+
+  @IsOptional()
+  cooperativeId?: string;
 }
 
 export class UnassignUserPlotsDto {
@@ -17,4 +26,7 @@ export class UnassignUserPlotsDto {
   @ArrayNotEmpty()
   @IsUUID('4', { each: true })
   plotIds: string[];
+
+  @IsOptional()
+  cooperativeId?: string;
 }

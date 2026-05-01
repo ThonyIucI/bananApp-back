@@ -32,7 +32,8 @@ export class MikroOrmPlotRepository extends IPlotRepository {
 
     if (filters.sectorId) where['sector'] = { id: filters.sectorId };
     if (filters.ownerUserId) where['ownerUser'] = { id: filters.ownerUserId };
-    if (filters.workerUserId) where['workerUser'] = { id: filters.workerUserId };
+    if (filters.workerUserId)
+      where['workerUser'] = { id: filters.workerUserId };
     if (filters.cooperativeId)
       where['sector'] = { cooperative: { id: filters.cooperativeId } };
 

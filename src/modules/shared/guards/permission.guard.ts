@@ -29,10 +29,9 @@ export class PermissionGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const required = this.reflector.getAllAndOverride<PermissionKey | undefined>(
-      PERMISSION_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const required = this.reflector.getAllAndOverride<
+      PermissionKey | undefined
+    >(PERMISSION_KEY, [context.getHandler(), context.getClass()]);
 
     if (!required) return true;
 
@@ -45,10 +44,12 @@ export class PermissionGuard implements CanActivate {
       CooperativeScopeStrategy | undefined
     >(COOPERATIVE_SCOPE_KEY, [context.getHandler(), context.getClass()]);
 
-    const cooperativeId = await this.resolveCooperativeId(
-      strategy ?? 'param',
-      { params, query, body },
-    );
+    const cooperativeId = await this.resolveCooperativeId(strategy, {
+      params,
+      query,
+      body,
+    });
+    console.log(cooperativeId, strategy);
 
     if (!cooperativeId) throw new ForbiddenException();
 
@@ -112,6 +113,12 @@ export class PermissionGuard implements CanActivate {
           plot?.sector as unknown as { cooperative: { id: string } } | null
         )?.cooperative?.id;
       }
+      default:
+        return (
+          ctx.params?.cooperativeId ||
+          ctx.query?.cooperativeId ||
+          ctx.body?.cooperativeId
+        );
     }
   }
 }

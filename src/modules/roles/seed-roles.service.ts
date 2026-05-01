@@ -150,8 +150,29 @@ const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'plot_read',
     'sector_read',
   ],
-  bagger: ['bundling_create', 'bundling_read', 'plot_read', 'sector_read'],
-  member: ['bundling_read', 'plot_read', 'harvest_read', 'cooperative_read'],
+  bagger: [
+    'user_read',
+    'plot_read',
+    'plot_manage',
+    'sector_read',
+    'bundling_read',
+    'bundling_update',
+    'ribbon_calendar_read',
+    'harvest_read',
+  ],
+  member: [
+    'user_read',
+    'plot_read',
+    'plot_manage',
+    'sector_read',
+    'sector_manage',
+    'bundling_read',
+    'bundling_update',
+    'ribbon_calendar_read',
+    'sanction_read',
+    'harvest_read',
+    'harvest_manage',
+  ],
 };
 
 @Injectable()
