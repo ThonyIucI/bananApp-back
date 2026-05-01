@@ -5,6 +5,8 @@ import {
   IsEmail,
   Matches,
   IsBoolean,
+  MaxLength,
+  MinLength,
 } from 'class-validator';
 
 export class UpdateUserDto {
@@ -32,6 +34,11 @@ export class UpdateUserDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @IsString()
+  @MinLength(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
+  @MaxLength(100)
+  password: string;
 
   @IsOptional()
   @IsBoolean()
