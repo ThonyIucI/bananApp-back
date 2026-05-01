@@ -5,6 +5,8 @@ export interface PlotFilters {
   ownerUserId?: string;
   workerUserId?: string;
   cooperativeId?: string;
+  /** Filter plots that have an active user_plot assignment for this user. */
+  assignedUserId?: string;
   limit?: number;
   offset?: number;
 }

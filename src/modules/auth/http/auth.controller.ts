@@ -25,7 +25,7 @@ const REFRESH_COOKIE_OPTIONS = {
   maxAge: 30 * 24 * 60 * 60 * 1000,
 };
 
-const CONTROLLER_ROUTES = {
+const AUTH_ROUTES = {
   LOGIN: 'login',
   ME: 'me',
   PROFILE: 'profile',
@@ -39,7 +39,7 @@ export class AuthController {
     private readonly getProfileHandler: GetProfileHandler,
   ) {}
 
-  @Post(CONTROLLER_ROUTES.LOGIN)
+  @Post(AUTH_ROUTES.LOGIN)
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() dto: LoginDto,
@@ -58,13 +58,13 @@ export class AuthController {
     };
   }
 
-  @Get(CONTROLLER_ROUTES.ME)
+  @Get(AUTH_ROUTES.ME)
   @UseGuards(JwtAuthGuard)
   me(@CurrentUser() user: JwtPayload) {
     return this.getMeHandler.execute(user.sub);
   }
 
-  @Get(CONTROLLER_ROUTES.PROFILE)
+  @Get(AUTH_ROUTES.PROFILE)
   @UseGuards(JwtAuthGuard)
   profile(@CurrentUser() user: JwtPayload) {
     return this.getProfileHandler.execute(user.sub);

@@ -4,6 +4,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 export interface BundlingSummaryQuery {
   cooperativeId?: string;
   plotId?: string;
+  plotIds?: string[];
   enfundadorUserId?: string;
   from?: Date;
   to?: Date;
@@ -54,7 +55,10 @@ export class BundlingSummaryHandler {
       params.push(query.cooperativeId);
       conditions.push(`s.cooperative_id = $${params.length}`);
     }
-    if (query.plotId) {
+    if (query.plotIds?.length) {
+      params.push(query.plotIds);
+      conditions.push(`b.plot_id = ANY($${params.length})`);
+    } else if (query.plotId) {
       params.push(query.plotId);
       conditions.push(`b.plot_id = $${params.length}`);
     }

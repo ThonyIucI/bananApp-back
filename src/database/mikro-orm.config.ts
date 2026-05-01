@@ -15,6 +15,7 @@ import { RibbonCalendar } from '../modules/ribbon-calendars/domain/ribbon-calend
 import { Sector } from '../modules/sectors/domain/sector.entity';
 import { Plot } from '../modules/plots/domain/plot.entity';
 import { SubPlot } from '../modules/plots/domain/sub-plot.entity';
+import { UserPlot } from '../modules/plots/domain/user-plot.entity';
 
 export default defineConfig({
   host: process.env.DB_HOST ?? '127.0.0.1',
@@ -34,6 +35,7 @@ export default defineConfig({
     Sector,
     Plot,
     SubPlot,
+    UserPlot,
     Bundling,
     RibbonCalendar,
   ],

@@ -16,7 +16,7 @@ export class MikroOrmBundlingRepository extends IBundlingRepository {
     return this.em.findOne(
       Bundling,
       { id, deletedAt: null },
-      { populate: ['plot', 'enfundadorUser', 'ribbonCalendar'] },
+      { populate: ['plot', 'subPlot', 'enfundadorUser', 'ribbonCalendar'] },
     );
   }
 
@@ -25,13 +25,15 @@ export class MikroOrmBundlingRepository extends IBundlingRepository {
   ): Promise<{ items: Bundling[]; total: number }> {
     const where: Record<string, unknown> = { deletedAt: null };
 
-    if (filters.plotId) where['plot'] = { id: filters.plotId };
+    const plotFilter: Record<string, unknown> = {};
+    if (filters.cooperativeId) plotFilter['sector'] = { cooperative: { id: filters.cooperativeId } };
+    if (filters.plotIds?.length) plotFilter['id'] = { $in: filters.plotIds };
+    else if (filters.plotId) plotFilter['id'] = filters.plotId;
+    if (Object.keys(plotFilter).length) where['plot'] = plotFilter;
+
+    if (filters.subPlotId) where['subPlot'] = { id: filters.subPlotId };
     if (filters.enfundadorUserId)
       where['enfundadorUser'] = { id: filters.enfundadorUserId };
-    if (filters.cooperativeId)
-      where['plot'] = {
-        sector: { cooperative: { id: filters.cooperativeId } },
-      };
     if (filters.from || filters.to) {
       const dateFilter: Record<string, Date> = {};
       if (filters.from) dateFilter['$gte'] = filters.from;
@@ -43,7 +45,7 @@ export class MikroOrmBundlingRepository extends IBundlingRepository {
     const offset = filters.offset ?? 0;
 
     const [items, total] = await this.em.findAndCount(Bundling, where, {
-      populate: ['plot', 'enfundadorUser', 'ribbonCalendar'],
+      populate: ['plot', 'subPlot', 'enfundadorUser', 'ribbonCalendar'],
       orderBy: { bundledAt: 'DESC' },
       limit,
       offset,

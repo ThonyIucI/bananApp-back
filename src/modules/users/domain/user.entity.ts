@@ -48,14 +48,15 @@ export class User extends UserSchema.class {
     return user;
   }
 
-  set(props: {
+  async set(props: {
     firstName?: string;
     lastName?: string;
     email?: string;
     dni?: string;
     isActive?: boolean;
+    password?: string;
     mustChangePassword?: boolean;
-  }): void {
+  }): Promise<void> {
     if (props.firstName !== undefined) this.firstName = props.firstName?.trim();
     if (props.lastName !== undefined) this.lastName = props.lastName?.trim();
     if (props.email !== undefined)
@@ -64,6 +65,9 @@ export class User extends UserSchema.class {
     if (props.isActive !== undefined) this.isActive = props.isActive;
     if (props.mustChangePassword !== undefined)
       this.mustChangePassword = props.mustChangePassword;
+    if (props.password !== undefined) {
+      this.passwordHash = await bcrypt.hash(props.password, BCRYPT_ROUNDS);
+    }
     this.validate();
   }
 

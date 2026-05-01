@@ -9,8 +9,11 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
+import { IsArray, IsOptional, IsUUID } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 import { PermissionGuard } from '../../shared/guards/permission.guard';
 import { RequirePermission } from '../../shared/decorators/require-permission.decorator';
@@ -21,6 +24,21 @@ import { ListSubPlotsHandler } from '../queries/list-sub-plots.handler';
 import { FindSubPlotByIdHandler } from '../queries/find-sub-plot-by-id.handler';
 import { CreateSubPlotDto } from './dtos/create-sub-plot.dto';
 import { UpdateSubPlotDto } from './dtos/update-sub-plot.dto';
+
+class ListSubPlotsQuery {
+  /** Filter by multiple plot IDs. Supports repeated query: ?plotIds=a&plotIds=b */
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    Array.isArray(value)
+      ? (value as string[])
+      : value
+        ? [value as string]
+        : undefined,
+  )
+  @IsArray()
+  @IsUUID('all', { each: true })
+  plotIds?: string[];
+}
 
 /** Routes scoped under a plot: GET/POST /plots/:plotId/sub-plots */
 @Controller('plots/:plotId/sub-plots')
@@ -48,11 +66,13 @@ export class SubPlotsByPlotController {
   @Get()
   @RequirePermission('plot_read')
   findAll(@Param('plotId', ParseUUIDPipe) plotId: string) {
-    return this.listHandler.execute(plotId);
+    return this.listHandler.execute({ plotId });
   }
 }
 
-/** Routes scoped by internal subPlot id: GET/PATCH/DELETE /sub-plots/:id */
+/** Routes scoped by internal subPlot id: GET/PATCH/DELETE /sub-plots/:id
+ *  Also exposes GET /sub-plots?plotIds[]=... for multi-plot scoping.
+ */
 @Controller('sub-plots')
 @UseGuards(JwtAuthGuard, PermissionGuard)
 export class SubPlotsByIdController {
@@ -60,7 +80,14 @@ export class SubPlotsByIdController {
     private readonly findByIdHandler: FindSubPlotByIdHandler,
     private readonly updateHandler: UpdateSubPlotHandler,
     private readonly deleteHandler: DeleteSubPlotHandler,
+    private readonly listHandler: ListSubPlotsHandler,
   ) {}
+
+  @Get()
+  @RequirePermission('plot_read')
+  findByPlots(@Query() query: ListSubPlotsQuery) {
+    return this.listHandler.execute({ plotIds: query.plotIds });
+  }
 
   @Get(':id')
   @RequirePermission('plot_read')
