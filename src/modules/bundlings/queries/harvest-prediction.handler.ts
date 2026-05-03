@@ -66,6 +66,7 @@ export class HarvestPredictionHandler {
 
     // Group by plot + harvest week window
     const windowMap = new Map<string, HarvestWindow>();
+    console.log(bundlings);
 
     for (const b of bundlings) {
       const harvestStart = new Date(
