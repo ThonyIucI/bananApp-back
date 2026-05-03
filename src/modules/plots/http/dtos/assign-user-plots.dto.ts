@@ -24,7 +24,7 @@ export class AssignUserPlotsDto {
 export class UnassignUserPlotsDto {
   @IsArray()
   @ArrayNotEmpty()
-  @IsUUID('4', { each: true })
+  @IsUUID('7', { each: true })
   plotIds: string[];
 
   @IsOptional()
