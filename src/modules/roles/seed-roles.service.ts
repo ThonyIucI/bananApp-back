@@ -166,6 +166,7 @@ const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'plot_manage',
     'sector_read',
     'sector_manage',
+    'bundling_create',
     'bundling_read',
     'bundling_update',
     'ribbon_calendar_read',
