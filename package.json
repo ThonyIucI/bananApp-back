@@ -32,10 +32,11 @@
     "migration:down": "mikro-orm migration:down",
     "migration:fresh": "mikro-orm migration:fresh --seed",
     "migration:check": "mikro-orm migration:check",
+    "migration:pending": "mikro-orm migration:pending",
     "migration:list": "mikro-orm migration:list",
     "schema:update": "npm run mikro -- schema:update",
     "mikro:debug": "npm run mikro -- debug",
-    "drop:database":"mikro-orm schema:drop --run --drop-migrations-table"
+    "drop:database": "mikro-orm schema:drop --run --drop-migrations-table"
   },
   "dependencies": {
     "@mikro-orm/core": "^7.0.11",
@@ -50,14 +51,19 @@
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/throttler": "^6.5.0",
+    "@types/passport-google-oauth20": "^2.0.17",
     "bcrypt": "^6.0.0",
     "cache-manager": "^7.2.8",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
     "ioredis": "^5.10.1",
+    "nestjs-resend": "^1.1.0",
     "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
+    "resend": "^6.12.3",
     "rxjs": "^7.8.1",
     "uuid": "^13.0.0",
     "uuidv7": "^1.2.1"
