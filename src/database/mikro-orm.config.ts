@@ -10,11 +10,14 @@ import { UserCooperativeRole } from '../modules/cooperatives/domain/user-coopera
 import { Role } from '../modules/roles/domain/role.entity';
 import { Permission } from '../modules/roles/domain/permission.entity';
 import { RolePermission } from '../modules/roles/domain/role-permission.entity';
+import { UserRole } from '../modules/roles/domain/user-role.entity';
 import { Bundling } from '../modules/bundlings/domain/bundling.entity';
 import { RibbonCalendar } from '../modules/ribbon-calendars/domain/ribbon-calendar.entity';
 import { Sector } from '../modules/sectors/domain/sector.entity';
 import { Plot } from '../modules/plots/domain/plot.entity';
 import { SubPlot } from '../modules/plots/domain/sub-plot.entity';
+import { EmailVerificationCode } from '../modules/auth/domain/email-verification-code.entity';
+import { RegistrationChallenge } from '../modules/auth/domain/registration-challenge.entity';
 
 export default defineConfig({
   host: process.env.DB_HOST ?? '127.0.0.1',
@@ -31,11 +34,14 @@ export default defineConfig({
     UserCooperative,
     UserCooperativeRole,
     RolePermission,
+    UserRole,
     Sector,
     Plot,
     SubPlot,
     Bundling,
     RibbonCalendar,
+    EmailVerificationCode,
+    RegistrationChallenge,
   ],
 
   metadataProvider: TsMorphMetadataProvider,
