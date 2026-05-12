@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//home/thony/own/saas/front/src/app/\\(auth\\)/registro/**)",
+      "Read(//home/thony/own/saas/front/graphify-out/**)",
+      "Read(//home/thony/own/saas/**)"
+    ]
+  }
+}
