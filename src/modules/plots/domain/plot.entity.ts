@@ -11,7 +11,7 @@ const PlotSchema = defineEntity({
   extends: BaseSchema,
   properties: {
     name: p.string().length(200),
-    sector: () => p.manyToOne(Sector).deleteRule('cascade'),
+    sector: () => p.manyToOne(Sector).nullable().deleteRule('set null'),
     ownerUser: () => p.manyToOne(User).deleteRule('cascade'),
     workerUser: () => p.manyToOne(User).nullable().deleteRule('set null'),
     areaHectares: p.decimal('number').precision(8).scale(4),
@@ -25,7 +25,7 @@ export class Plot extends PlotSchema.class {
 
   static make(props: {
     name: string;
-    sector: Sector;
+    sector?: Sector | null;
     ownerUser: User;
     workerUser?: User;
     areaHectares: number;
@@ -33,7 +33,7 @@ export class Plot extends PlotSchema.class {
   }): Plot {
     const plot = new Plot();
     plot.name = props.name.trim();
-    plot.sector = props.sector;
+    plot.sector = props.sector ?? null;
     plot.ownerUser = props.ownerUser;
     plot.workerUser = props.workerUser ?? null;
     plot.areaHectares = props.areaHectares;

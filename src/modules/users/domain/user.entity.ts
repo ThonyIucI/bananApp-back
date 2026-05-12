@@ -2,6 +2,7 @@ import { defineEntity, p } from '@mikro-orm/core';
 import * as bcrypt from 'bcrypt';
 import { BaseSchema } from '../../shared/base.entity';
 import { ValidationException } from '../../shared/exceptions/domain.exception';
+import { Role } from '../../roles/domain/role.entity';
 
 const BCRYPT_ROUNDS = 10;
 
@@ -24,6 +25,10 @@ const UserSchema = defineEntity({
     failedLoginAttempts: p.integer().default(0),
     lockedUntil: p.datetime().nullable(),
     lastLoginAt: p.datetime().nullable(),
+    emailVerifiedAt: p.datetime().nullable(),
+    googleId: p.string().length(100).nullable(),
+    avatarUrl: p.string().length(500).nullable(),
+    userRoles: () => p.manyToMany(Role).fixedOrder().pivotTable('user_roles'),
   },
 });
 
@@ -32,20 +37,32 @@ export class User extends UserSchema.class {
     firstName: string;
     lastName: string;
     email: string;
-    password: string;
+    password?: string;
     dni?: string;
+    googleId?: string;
+    avatarUrl?: string;
+    emailVerifiedAt?: Date;
   }): Promise<User> {
     const user = new User();
     user.firstName = props.firstName?.trim();
     user.lastName = props.lastName?.trim();
     user.email = props.email?.trim().toLowerCase();
-    user.passwordHash = await bcrypt.hash(props.password, BCRYPT_ROUNDS);
+    user.passwordHash = props.password
+      ? await bcrypt.hash(props.password, BCRYPT_ROUNDS)
+      : '';
     user.dni = props.dni?.trim() ?? null;
     user.isActive = true;
     user.mustChangePassword = false;
     user.failedLoginAttempts = 0;
+    user.emailVerifiedAt = props.emailVerifiedAt ?? null;
+    user.googleId = props.googleId ?? null;
+    user.avatarUrl = props.avatarUrl ?? null;
     user.validate();
     return user;
+  }
+
+  isEmailVerified(): boolean {
+    return this.emailVerifiedAt !== null;
   }
 
   set(props: {

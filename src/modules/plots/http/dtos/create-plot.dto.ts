@@ -31,8 +31,9 @@ export class CreatePlotDto {
   @Length(2, 200, { message: 'El nombre debe tener entre 2 y 200 caracteres' })
   name: string;
 
+  @IsOptional()
   @IsUUID()
-  sectorId: string;
+  sectorId?: string;
 
   @IsUUID()
   ownerUserId: string;
