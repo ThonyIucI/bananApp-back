@@ -152,6 +152,7 @@ export class BundlingsController {
     return this.statsMonthlyHandler.execute({
       cooperativeId: query.cooperativeId,
       months: query.months,
+      scopedUserId: query.scopedUserId,
     });
   }
 
@@ -163,6 +164,7 @@ export class BundlingsController {
       cooperativeId: query.cooperativeId,
       weeks: query.weeks,
       enfundadorUserId: query.enfundadorUserId,
+      scopedUserId: query.scopedUserId,
     });
   }
 
@@ -172,6 +174,8 @@ export class BundlingsController {
   statsOverview(@Query() query: StatsOverviewDto) {
     return this.statsOverviewHandler.execute({
       cooperativeId: query.cooperativeId,
+      scopedUserId: query.scopedUserId,
+      enfundadorUserId: query.enfundadorUserId,
     });
   }
 }

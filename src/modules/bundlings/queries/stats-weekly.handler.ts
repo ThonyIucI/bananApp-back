@@ -5,6 +5,7 @@ export interface StatsWeeklyQuery {
   cooperativeId: string;
   weeks?: number;
   enfundadorUserId?: string;
+  scopedUserId?: string;
 }
 
 export interface WeekEntry {
@@ -44,6 +45,12 @@ export class StatsWeeklyHandler {
       params.push(query.enfundadorUserId);
       conditions.push(`b.enfundador_user_id = $${params.length}`);
     }
+    if (query.scopedUserId) {
+      params.push(query.scopedUserId);
+      conditions.push(
+        `b.plot_id IN (SELECT up.plot_id FROM user_plot up WHERE up.user_id = $${params.length} AND up.deleted_at IS NULL)`,
+      );
+    }
 
     const sql = `
       SELECT
@@ -59,7 +66,9 @@ export class StatsWeeklyHandler {
     `;
 
     const conn = this.em.getConnection() as any;
-    const result = await conn.getClient().executeQuery({ sql, parameters: params });
+    const result = await conn
+      .getClient()
+      .executeQuery({ sql, parameters: params });
     const rows: WeekRow[] = result.rows;
     const rowMap = new Map<string, WeekRow>(rows.map((r) => [r.week_start, r]));
 
@@ -81,7 +90,10 @@ export class StatsWeeklyHandler {
       const year = monday.getFullYear();
       const startOfYear = new Date(year, 0, 1);
       const weekNum = Math.ceil(
-        ((monday.getTime() - startOfYear.getTime()) / 86400000 + startOfYear.getDay() + 1) / 7,
+        ((monday.getTime() - startOfYear.getTime()) / 86400000 +
+          startOfYear.getDay() +
+          1) /
+          7,
       );
       const week = `${year}-W${String(weekNum).padStart(2, '0')}`;
       const label = `Sem ${weekNum}`;

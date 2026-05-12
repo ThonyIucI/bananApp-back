@@ -49,7 +49,6 @@ export class PermissionGuard implements CanActivate {
       query,
       body,
     });
-    console.log(cooperativeId, strategy);
 
     if (!cooperativeId) throw new ForbiddenException();
 

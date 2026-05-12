@@ -4,6 +4,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 export interface StatsMonthlyQuery {
   cooperativeId: string;
   months?: number;
+  scopedUserId?: string;
 }
 
 export interface MonthEntry {
@@ -25,7 +26,20 @@ interface MonthRow {
   active_enfundadores: string;
 }
 
-const MONTH_LABELS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const MONTH_LABELS = [
+  'Ene',
+  'Feb',
+  'Mar',
+  'Abr',
+  'May',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dic',
+];
 
 @Injectable()
 export class StatsMonthlyHandler {
@@ -34,6 +48,19 @@ export class StatsMonthlyHandler {
   /** Returns monthly bundling stats for the last N months, always returning N entries (zeros for missing months). */
   async execute(query: StatsMonthlyQuery): Promise<StatsMonthlyResult> {
     const monthCount = query.months ?? 12;
+    const params: unknown[] = [query.cooperativeId, monthCount];
+    const conditions = [
+      's.cooperative_id = $1',
+      'b.deleted_at IS NULL',
+      'b.bundled_at >= now() - make_interval(months => $2)',
+    ];
+
+    if (query.scopedUserId) {
+      params.push(query.scopedUserId);
+      conditions.push(
+        `b.plot_id IN (SELECT up.plot_id FROM user_plot up WHERE up.user_id = $${params.length} AND up.deleted_at IS NULL)`,
+      );
+    }
 
     const sql = `
       SELECT
@@ -44,15 +71,15 @@ export class StatsMonthlyHandler {
       FROM bundlings b
       JOIN plots p      ON p.id = b.plot_id
       JOIN sectors s    ON s.id = p.sector_id
-      WHERE s.cooperative_id = $1
-        AND b.deleted_at IS NULL
-        AND b.bundled_at >= now() - make_interval(months => $2)
+      WHERE ${conditions.join(' AND ')}
       GROUP BY month
       ORDER BY month ASC
     `;
 
     const conn = this.em.getConnection() as any;
-    const result = await conn.getClient().executeQuery({ sql, parameters: [query.cooperativeId, monthCount] });
+    const result = await conn
+      .getClient()
+      .executeQuery({ sql, parameters: params });
     const rows: MonthRow[] = result.rows;
 
     const rowMap = new Map<string, MonthRow>(rows.map((r) => [r.month, r]));

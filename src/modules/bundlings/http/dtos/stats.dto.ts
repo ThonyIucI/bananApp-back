@@ -11,6 +11,10 @@ export class StatsMonthlyDto {
   @Min(1)
   @Max(24)
   months?: number;
+
+  @IsOptional()
+  @IsUUID()
+  scopedUserId?: string;
 }
 
 export class StatsWeeklyDto {
@@ -27,9 +31,21 @@ export class StatsWeeklyDto {
   @IsOptional()
   @IsUUID()
   enfundadorUserId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  scopedUserId?: string;
 }
 
 export class StatsOverviewDto {
   @IsUUID()
   cooperativeId: string;
+
+  @IsOptional()
+  @IsUUID()
+  scopedUserId?: string;
+
+  @IsOptional()
+  @IsUUID()
+  enfundadorUserId?: string;
 }
