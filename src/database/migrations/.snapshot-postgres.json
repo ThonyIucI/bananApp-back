@@ -831,7 +831,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "unique": false,
           "length": null,
           "precision": null,
@@ -939,7 +939,7 @@
             "id"
           ],
           "updateRule": "no action",
-          "deleteRule": "cascade"
+          "deleteRule": "set null"
         },
         "plots_worker_user_id_foreign": {
           "columnNames": [
