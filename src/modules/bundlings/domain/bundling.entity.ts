@@ -1,6 +1,7 @@
 import { defineEntity, p } from '@mikro-orm/core';
 import { BaseSchema } from '../../shared/base.entity';
 import { Plot } from '../../plots/domain/plot.entity';
+import { SubPlot } from '../../plots/domain/sub-plot.entity';
 import { User } from '../../users/domain/user.entity';
 import { RibbonCalendar } from '../../ribbon-calendars/domain/ribbon-calendar.entity';
 import {
@@ -14,6 +15,7 @@ const BundlingSchema = defineEntity({
   extends: BaseSchema,
   properties: {
     plot: () => p.manyToOne(Plot).deleteRule('cascade'),
+    subPlot: () => p.manyToOne(SubPlot).nullable().deleteRule('set null'),
     enfundadorUser: () => p.manyToOne(User).deleteRule('cascade'),
     quantity: p.integer(),
     ribbonCalendar: () =>
@@ -33,12 +35,14 @@ export class Bundling extends BundlingSchema.class {
     quantity: number;
     bundledAt: Date;
     localUuid: string;
+    subPlot?: SubPlot;
     ribbonCalendar?: RibbonCalendar;
     ribbonColorFree?: string;
     notes?: string;
   }): Bundling {
     const b = new Bundling();
     b.plot = props.plot;
+    b.subPlot = props.subPlot ?? null;
     b.enfundadorUser = props.enfundadorUser;
     b.quantity = props.quantity;
     b.bundledAt = props.bundledAt;
@@ -49,6 +53,26 @@ export class Bundling extends BundlingSchema.class {
     b.syncedAt = null;
     b.validate();
     return b;
+  }
+
+  /** Updates mutable fields. Immutable fields (plot, enfundadorUser, localUuid) cannot change. */
+  set(props: {
+    subPlot?: SubPlot | null;
+    quantity?: number;
+    ribbonCalendar?: RibbonCalendar | null;
+    ribbonColorFree?: string | null;
+    bundledAt?: Date;
+    notes?: string | null;
+  }): void {
+    if (props.subPlot !== undefined) this.subPlot = props.subPlot;
+    if (props.quantity !== undefined) this.quantity = props.quantity;
+    if (props.ribbonCalendar !== undefined)
+      this.ribbonCalendar = props.ribbonCalendar;
+    if (props.ribbonColorFree !== undefined)
+      this.ribbonColorFree = props.ribbonColorFree?.trim() ?? null;
+    if (props.bundledAt !== undefined) this.bundledAt = props.bundledAt;
+    if (props.notes !== undefined) this.notes = props.notes?.trim() ?? null;
+    this.validate();
   }
 
   private validate(): void {
