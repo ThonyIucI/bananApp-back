@@ -106,7 +106,6 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { limit: 5, ttl: 900000 } })
   register(@Body() dto: RegisterDto) {
-    console.log(dto);
     return this.registerHandler.execute({
       firstName: dto.firstName,
       lastName: dto.lastName,
@@ -182,11 +181,9 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleCallback(
     @Req() req: { user: GoogleProfile },
-    @Res() res: Response, // Inyectamos la respuesta de Express
+    @Res() res: Response,
   ) {
     const result = await this.googleAuthHandler.execute(req.user);
-    console.log(result);
-
     const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
 
     return res.redirect(
