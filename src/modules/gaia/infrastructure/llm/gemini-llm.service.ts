@@ -1,8 +1,11 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { GoogleGenAI } from '@google/genai';
-import { ILLMService, IGaiaHistoryEntry } from '../../domain/llm/llm.service.interface';
+import {
+  ILLMService,
+  IGaiaHistoryEntry,
+} from '../../domain/llm/llm.service.interface';
 
-const GEMINI_MODEL_ID = 'gemini-2.5-flash-preview-05-20';
+const GEMINI_MODEL_ID = 'gemini-2.5-flash';
 
 @Injectable()
 export class GeminiLLMService implements ILLMService, OnModuleInit {
@@ -11,7 +14,9 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
   onModuleInit(): void {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      throw new Error('GEMINI_API_KEY environment variable is not set. GaIA cannot start.');
+      throw new Error(
+        'GEMINI_API_KEY environment variable is not set. GaIA cannot start.',
+      );
     }
     this.client = new GoogleGenAI({ apiKey });
   }
@@ -35,13 +40,15 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
 
     const response = await this.client.models.generateContent({
       model: GEMINI_MODEL_ID,
-      systemInstruction: systemPrompt,
       contents,
+      config: { systemInstruction: systemPrompt },
     });
 
-    const text = response.candidates?.[0]?.content?.parts?.[0]?.text;
+    const text = response.text;
     if (!text) {
-      throw new Error('GaIA no está disponible en este momento. Intenta de nuevo.');
+      throw new Error(
+        'GaIA no está disponible en este momento. Intenta de nuevo.',
+      );
     }
     return text;
   }

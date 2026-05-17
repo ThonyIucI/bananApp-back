@@ -3,7 +3,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { IGaiaUsageRepository } from '../domain/gaia-usage.repository';
 import { GAIA_PLAN_LIMITS, TGaiaPlan } from '../domain/gaia-plans';
 import { GaiaQuotaExceededException } from '../domain/exceptions/gaia-quota-exceeded.exception';
-import { User } from '../../users/domain/user.entity';
+import { EGaiaPlan, User } from '../../users/domain/user.entity';
 
 const getTodayIso = (): string => new Date().toISOString().split('T')[0];
 
@@ -19,7 +19,7 @@ export class GaiaQuotaService {
    */
   async assertWithinQuota(userId: string): Promise<void> {
     const user = await this.em.findOneOrFail(User, { id: userId });
-    const plan = (user.subscriptionTier ?? 'free') as TGaiaPlan;
+    const plan = (user.subscriptionTier ?? EGaiaPlan.FREE) as TGaiaPlan;
     const limit = GAIA_PLAN_LIMITS[plan].dailyInteractions;
 
     const today = getTodayIso();
@@ -37,9 +37,11 @@ export class GaiaQuotaService {
   }
 
   /** Devuelve las interacciones restantes del día. */
-  async getRemainingInteractions(userId: string): Promise<{ remaining: number; limit: number }> {
+  async getRemainingInteractions(
+    userId: string,
+  ): Promise<{ remaining: number; limit: number }> {
     const user = await this.em.findOneOrFail(User, { id: userId });
-    const plan = (user.subscriptionTier ?? 'free') as TGaiaPlan;
+    const plan = (user.subscriptionTier ?? EGaiaPlan.FREE) as TGaiaPlan;
     const limit = GAIA_PLAN_LIMITS[plan].dailyInteractions;
 
     const today = getTodayIso();

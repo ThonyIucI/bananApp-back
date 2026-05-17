@@ -1,18 +1,19 @@
 import { defineEntity, p } from '@mikro-orm/core';
-import { uuidv7 } from 'uuidv7';
 import { User } from '../../users/domain/user.entity';
+import { entityIdV7 } from '../../shared/base.entity';
 
 const GaiaUsageSchema = defineEntity({
   name: 'GaiaUsage',
-  tableName: 'gaia_usage',
+  tableName: 'gaia_usages',
   properties: {
-    id: p.uuid().primary().onCreate(() => uuidv7()),
+    id: entityIdV7,
     user: () => p.manyToOne(User).deleteRule('cascade'),
-    usageDate: p.dateString(),
+    /** ISO date string YYYY-MM-DD — one row per user per day */
+    usageDate: p.string().length(10),
     interactionCount: p.integer().default(0),
     tokenEstimate: p.integer().nullable(),
   },
-  indexes: [{ properties: ['user', 'usageDate'], unique: true }],
+  indexes: [{ properties: ['user', 'usageDate'], type: 'unique' }],
 });
 
 export class GaiaUsage extends GaiaUsageSchema.class {}
