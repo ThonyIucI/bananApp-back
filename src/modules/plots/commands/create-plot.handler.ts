@@ -9,7 +9,7 @@ import { User } from '../../users/domain/user.entity';
 
 export interface CreatePlotCommand {
   name: string;
-  sectorId: string;
+  sectorId?: string;
   ownerUserId: string;
   workerUserId?: string;
   areaHectares: number;
@@ -39,8 +39,10 @@ export class CreatePlotHandler {
   ) {}
   async execute(cmd: CreatePlotCommand): Promise<Plot> {
     return await this.em.transactional(async (em) => {
-      const sector = await this.sectorRepo.findById(cmd.sectorId);
-      if (!sector) throw new NotFoundException('Sector no encontrado');
+      const sector = cmd.sectorId
+        ? await this.sectorRepo.findById(cmd.sectorId)
+        : null;
+      if (cmd.sectorId && !sector) throw new NotFoundException('Sector no encontrado');
 
       const ownerUser = await this.userRepo.findById(cmd.ownerUserId);
       if (!ownerUser)
@@ -55,7 +57,7 @@ export class CreatePlotHandler {
 
       const plot = Plot.make({
         name: cmd.name,
-        sector,
+        sector: sector ?? undefined,
         ownerUser,
         workerUser,
         areaHectares: cmd.areaHectares,

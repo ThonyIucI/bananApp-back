@@ -10,6 +10,8 @@ import { PermissionKey } from '../../roles/domain/permission.entity';
 import { UserCooperative } from '../../cooperatives/domain/user-cooperative.entity';
 import { UserCooperativeRole } from '../../cooperatives/domain/user-cooperative-role.entity';
 import { RolePermission } from '../../roles/domain/role-permission.entity';
+import { UserRole } from '../../roles/domain/user-role.entity';
+import { ERole } from '../../roles/domain/role.entity';
 import { Plot } from '../../plots/domain/plot.entity';
 import { ForbiddenException } from '../exceptions/domain.exception';
 import { JwtPayload } from '../../auth/infrastructure/jwt.strategy';
@@ -29,16 +31,30 @@ export class PermissionGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const required = this.reflector.getAllAndOverride<
+    const permissionRequiredKey = this.reflector.getAllAndOverride<
       PermissionKey | undefined
     >(PERMISSION_KEY, [context.getHandler(), context.getClass()]);
 
-    if (!required) return true;
+    if (!permissionRequiredKey) return true;
 
     const request = context.switchToHttp().getRequest<RequestShape>();
     const { user, params, query, body } = request;
 
     if (user.isSuperadmin) return true;
+    const independentFarmerRole = await this.em.findOne(UserRole, {
+      user: { id: user.sub },
+      role: { key: ERole.INDEPENDENT_FARMER },
+    });
+
+    if (independentFarmerRole) {
+      const hasPermission = await this.em.findOne(RolePermission, {
+        role: independentFarmerRole.role,
+        permission: { key: permissionRequiredKey },
+      });
+
+      if (!hasPermission) throw new ForbiddenException();
+      return true;
+    }
 
     const strategy = this.reflector.getAllAndOverride<
       CooperativeScopeStrategy | undefined
@@ -49,7 +65,6 @@ export class PermissionGuard implements CanActivate {
       query,
       body,
     });
-    console.log(cooperativeId, strategy);
 
     if (!cooperativeId) throw new ForbiddenException();
 
@@ -73,7 +88,7 @@ export class PermissionGuard implements CanActivate {
 
     const hasPermission = await this.em.findOne(RolePermission, {
       role: { id: { $in: roleIds } },
-      permission: { key: required },
+      permission: { key: permissionRequiredKey },
     });
 
     if (!hasPermission) throw new ForbiddenException();

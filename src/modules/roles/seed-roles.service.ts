@@ -27,6 +27,10 @@ const ROLE_DISPLAY: Record<RoleKey, { name: string; description: string }> = {
     name: 'Calibrador',
     description: 'Calibra y clasifica la producción',
   },
+  independent_farmer: {
+    name: 'Productor Independiente',
+    description: 'Agricultor sin cooperativa que gestiona sus propias parcelas',
+  },
 };
 
 const PERMISSION_DESCRIPTIONS: Record<PermissionKey, string> = {
@@ -174,6 +178,7 @@ const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'harvest_read',
     'harvest_manage',
   ],
+  independent_farmer: ['plot_read', 'plot_manage', 'sector_read'],
 };
 
 @Injectable()

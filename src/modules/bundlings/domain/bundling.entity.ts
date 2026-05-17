@@ -66,7 +66,8 @@ export class Bundling extends BundlingSchema.class {
   }): void {
     if (props.subPlot !== undefined) this.subPlot = props.subPlot;
     if (props.quantity !== undefined) this.quantity = props.quantity;
-    if (props.ribbonCalendar !== undefined) this.ribbonCalendar = props.ribbonCalendar;
+    if (props.ribbonCalendar !== undefined)
+      this.ribbonCalendar = props.ribbonCalendar;
     if (props.ribbonColorFree !== undefined)
       this.ribbonColorFree = props.ribbonColorFree?.trim() ?? null;
     if (props.bundledAt !== undefined) this.bundledAt = props.bundledAt;

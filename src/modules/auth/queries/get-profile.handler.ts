@@ -24,6 +24,7 @@ export interface ProfileResult {
   mustChangePassword: boolean;
   createdAt: Date;
   cooperatives: ProfileCooperative[];
+  userRoles: string[];
 }
 
 @Injectable()
@@ -31,7 +32,11 @@ export class GetProfileHandler {
   constructor(private readonly em: EntityManager) {}
 
   async execute(userId: string): Promise<ProfileResult> {
-    const user = await this.em.findOne(User, { id: userId, deletedAt: null });
+    const user = await this.em.findOne(
+      User,
+      { id: userId },
+      { populate: ['userRoles'] },
+    );
     if (!user) throw new NotFoundException('Usuario no encontrado');
 
     const memberships = await this.em.find(
@@ -81,6 +86,7 @@ export class GetProfileHandler {
       mustChangePassword: user.mustChangePassword ?? false,
       createdAt: user.createdAt as Date,
       cooperatives,
+      userRoles: user?.userRoles?.map((r) => r.key),
     };
   }
 }

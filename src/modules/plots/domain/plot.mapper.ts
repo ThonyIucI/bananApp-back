@@ -6,7 +6,7 @@ import { Plot } from '../domain/plot.entity';
 export interface PlotLookupDto {
   id: string;
   name: string;
-  sector: Sector;
+  sector: Sector | null;
   ownerUser: User;
   areaHectares: number;
   subPlotsQuantity: number;

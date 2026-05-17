@@ -25,7 +25,20 @@ interface MonthRow {
   active_enfundadores: string;
 }
 
-const MONTH_LABELS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const MONTH_LABELS = [
+  'Ene',
+  'Feb',
+  'Mar',
+  'Abr',
+  'May',
+  'Jun',
+  'Jul',
+  'Ago',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dic',
+];
 
 @Injectable()
 export class StatsMonthlyHandler {
@@ -52,7 +65,9 @@ export class StatsMonthlyHandler {
     `;
 
     const conn = this.em.getConnection() as any;
-    const result = await conn.getClient().executeQuery({ sql, parameters: [query.cooperativeId, monthCount] });
+    const result = await conn
+      .getClient()
+      .executeQuery({ sql, parameters: [query.cooperativeId, monthCount] });
     const rows: MonthRow[] = result.rows;
 
     const rowMap = new Map<string, MonthRow>(rows.map((r) => [r.month, r]));

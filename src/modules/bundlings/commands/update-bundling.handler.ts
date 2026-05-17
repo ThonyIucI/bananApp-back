@@ -70,7 +70,9 @@ export class UpdateBundlingHandler {
       if (cmd.ribbonCalendarId === null) {
         ribbonCalendar = null;
       } else {
-        ribbonCalendar = await this.ribbonCalendarRepo.findById(cmd.ribbonCalendarId);
+        ribbonCalendar = await this.ribbonCalendarRepo.findById(
+          cmd.ribbonCalendarId,
+        );
         if (!ribbonCalendar)
           throw new NotFoundException('Calendario de cinta no encontrado');
       }

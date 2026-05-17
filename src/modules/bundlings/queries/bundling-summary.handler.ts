@@ -122,7 +122,7 @@ export class BundlingSummaryHandler {
       if (row.sub_plot_id) {
         plotSummary.bySubPlot.push({
           subPlotId: row.sub_plot_id,
-          subPlotName: row.sub_plot_name!,
+          subPlotName: row.sub_plot_name,
           totalQuantity: qty,
           totalRecords: rec,
         });

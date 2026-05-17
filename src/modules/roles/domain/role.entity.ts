@@ -1,7 +1,15 @@
 import { defineEntity, p } from '@mikro-orm/core';
 import { BaseSchema } from '../../shared/base.entity';
 import { ValidationException } from '../../shared/exceptions/domain.exception';
-
+export enum ERole {
+  SUPERADMIN = 'superadmin',
+  ADMIN = 'admin',
+  MEMBER = 'member',
+  BAGGER = 'bagger',
+  HARVEST_CHIEF = 'harvest_chief',
+  CALIBRATOR = 'calibrator',
+  INDEPENDENT_FARMER = 'independent_farmer',
+}
 export const ROLE_KEYS = [
   'superadmin',
   'admin',
@@ -9,6 +17,7 @@ export const ROLE_KEYS = [
   'bagger',
   'harvest_chief',
   'calibrator',
+  'independent_farmer',
 ] as const;
 
 export type RoleKey = (typeof ROLE_KEYS)[number];

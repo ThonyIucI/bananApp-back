@@ -4,6 +4,7 @@ import { User } from '../../users/domain/user.entity';
 import { UserCooperative } from '../../cooperatives/domain/user-cooperative.entity';
 import { UserCooperativeRole } from '../../cooperatives/domain/user-cooperative-role.entity';
 import { NotFoundException } from '../../shared/exceptions/domain.exception';
+import { UserRole } from '../../roles/domain/user-role.entity';
 
 export interface CooperativeMembership {
   cooperativeId: string;
@@ -19,6 +20,7 @@ export interface MeResult {
   isSuperadmin: boolean;
   mustChangePassword: boolean;
   cooperatives: CooperativeMembership[];
+  userRoles: UserRole[];
 }
 
 @Injectable()
@@ -33,6 +35,12 @@ export class GetMeHandler {
       UserCooperative,
       { user: { id: userId }, isActive: true, deletedAt: null },
       { populate: ['cooperative'] },
+    );
+
+    const userRoles = await this.em.find(
+      UserRole,
+      { user: { id: userId } },
+      { populate: ['role'] },
     );
 
     const cooperatives: CooperativeMembership[] = [];
@@ -66,6 +74,7 @@ export class GetMeHandler {
       isSuperadmin: user.isSuperadmin ?? false,
       mustChangePassword: user.mustChangePassword ?? false,
       cooperatives,
+      userRoles,
     };
   }
 }
