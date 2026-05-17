@@ -39,6 +39,7 @@
     "drop:database": "mikro-orm schema:drop --run --drop-migrations-table"
   },
   "dependencies": {
+    "@google/genai": "^2.3.0",
     "@mikro-orm/core": "^7.0.11",
     "@mikro-orm/migrations": "^7.0.11",
     "@mikro-orm/nestjs": "^7.0.1",

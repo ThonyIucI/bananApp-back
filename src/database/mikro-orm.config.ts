@@ -19,6 +19,7 @@ import { SubPlot } from '../modules/plots/domain/sub-plot.entity';
 import { EmailVerificationCode } from '../modules/auth/domain/email-verification-code.entity';
 import { RegistrationChallenge } from '../modules/auth/domain/registration-challenge.entity';
 import { UserPlot } from '../modules/plots/domain/user-plot.entity';
+import { GaiaUsage } from '../modules/gaia/domain/gaia-usage.entity';
 
 export default defineConfig({
   host: process.env.DB_HOST ?? '127.0.0.1',
@@ -44,6 +45,7 @@ export default defineConfig({
     RibbonCalendar,
     EmailVerificationCode,
     RegistrationChallenge,
+    GaiaUsage,
   ],
 
   metadataProvider: TsMorphMetadataProvider,

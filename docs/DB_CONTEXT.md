@@ -261,6 +261,25 @@ Registro de enfunde: cuántas fundas colocó un enfundador en una parcela.
 
 ---
 
+---
+
+## `gaia_usages`
+
+Cuotas diarias de interacción con GaIA por usuario. No almacena mensajes ni conversaciones — solo el conteo diario.
+
+| Column              | Type        | Nullable | Default | Constraints                         |
+|---------------------|-------------|----------|---------|-------------------------------------|
+| `id`                | uuid        | NO       | uuidv7  | PK                                  |
+| `user_id`           | uuid        | NO       |         | FK → users.id CASCADE DELETE        |
+| `usage_date`        | varchar(10) | NO       |         | ISO date `YYYY-MM-DD`               |
+| `interaction_count` | integer     | NO       | 0       |                                     |
+| `token_estimate`    | integer     | YES      | NULL    | Para proyecciones de costo          |
+
+**UNIQUE:** `(user_id, usage_date)` — una fila por usuario por día.
+**INDEX:** `(user_id, usage_date)` para consultas frecuentes de cuota.
+
+---
+
 ## Planned entities (próximos sprints)
 
 | Entity     | Table        | Sprint | Notas                                           |

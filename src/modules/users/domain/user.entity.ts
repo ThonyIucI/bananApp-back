@@ -4,6 +4,12 @@ import { BaseSchema } from '../../shared/base.entity';
 import { ValidationException } from '../../shared/exceptions/domain.exception';
 import { Role } from '../../roles/domain/role.entity';
 
+export enum EGaiaPlan {
+  FREE = 'free',
+  PRO = 'pro',
+  PROMAX = 'promax',
+}
+
 const BCRYPT_ROUNDS = 10;
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -28,6 +34,7 @@ const UserSchema = defineEntity({
     emailVerifiedAt: p.datetime().nullable(),
     googleId: p.string().length(100).nullable(),
     avatarUrl: p.string().length(500).nullable(),
+    subscriptionTier: p.enum(Object.values(EGaiaPlan)).default(EGaiaPlan.FREE),
     userRoles: () => p.manyToMany(Role).fixedOrder().pivotTable('user_roles'),
   },
 });
