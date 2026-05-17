@@ -13,6 +13,7 @@ import { BundlingsModule } from './modules/bundlings/bundlings.module';
 import { RibbonCalendarsModule } from './modules/ribbon-calendars/ribbon-calendars.module';
 import { SectorsModule } from './modules/sectors/sectors.module';
 import { PlotsModule } from './modules/plots/plots.module';
+import { GaiaModule } from './modules/gaia/gaia.module';
 import { MigrationRunnerService } from './database/migration-runner.service';
 import { SeedSuperadminService } from './database/seed-superadmin.service';
 
@@ -37,6 +38,7 @@ class HealthController {
     RibbonCalendarsModule,
     SectorsModule,
     PlotsModule,
+    GaiaModule,
   ],
   controllers: [HealthController],
   // TODO: mejorar la configuración de seeders con @mikro-orm/seeder
