@@ -9,8 +9,11 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
+import { IsArray, IsOptional, IsUUID } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 import { PermissionGuard } from '../../shared/guards/permission.guard';
 import { RequirePermission } from '../../shared/decorators/require-permission.decorator';
@@ -21,6 +24,21 @@ import { ListSectorsHandler } from '../queries/list-sectors.handler';
 import { FindSectorByIdHandler } from '../queries/find-sector-by-id.handler';
 import { CreateSectorDto } from './dtos/create-sector.dto';
 import { UpdateSectorDto } from './dtos/update-sector.dto';
+
+class ListSectorsQuery {
+  /** Filter by multiple plot IDs. Supports repeated query: ?plotIds=a&plotIds=b */
+  @IsOptional()
+  @Transform(({ value }: { value: unknown }) =>
+    Array.isArray(value)
+      ? (value as string[])
+      : value
+        ? [value as string]
+        : undefined,
+  )
+  @IsArray()
+  @IsUUID('all', { each: true })
+  plotIds?: string[];
+}
 
 /** Routes scoped under a cooperative: GET/POST /cooperatives/:cooperativeId/sectors */
 @Controller('cooperatives/:cooperativeId/sectors')
@@ -46,8 +64,11 @@ export class SectorsController {
 
   @Get()
   @RequirePermission('sector_read')
-  findAll(@Param('cooperativeId', ParseUUIDPipe) cooperativeId: string) {
-    return this.listHandler.execute(cooperativeId);
+  findAll(
+    @Param('cooperativeId', ParseUUIDPipe) cooperativeId: string,
+    @Query() query: ListSectorsQuery,
+  ) {
+    return this.listHandler.execute({ cooperativeId, plotIds: query.plotIds });
   }
 }
 

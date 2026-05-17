@@ -202,6 +202,21 @@
           "default": null,
           "comment": null,
           "enumItems": []
+        },
+        "sub_plot_id": {
+          "name": "sub_plot_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": []
         }
       },
       "indexes": [
@@ -224,6 +239,16 @@
           "keyName": "bundlings_pkey",
           "unique": true,
           "primary": true
+        },
+        {
+          "columnNames": [
+            "sub_plot_id"
+          ],
+          "composite": false,
+          "constraint": false,
+          "keyName": "bundlings_sub_plot_id_idx",
+          "unique": false,
+          "primary": false
         }
       ],
       "checks": [],
@@ -261,6 +286,19 @@
           "constraintName": "bundlings_ribbon_calendar_id_foreign",
           "localTableName": "public.bundlings",
           "referencedTableName": "public.ribbon_calendars",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "updateRule": "no action",
+          "deleteRule": "set null"
+        },
+        "bundlings_sub_plot_id_foreign": {
+          "columnNames": [
+            "sub_plot_id"
+          ],
+          "constraintName": "bundlings_sub_plot_id_foreign",
+          "localTableName": "public.bundlings",
+          "referencedTableName": "public.sub_plots",
           "referencedColumnNames": [
             "id"
           ],

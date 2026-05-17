@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Throttle, SkipThrottle } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 import { Response } from 'express';
 import { LoginDto } from './dtos/login.dto';
 import { RegisterDto } from './dtos/register.dto';
@@ -42,7 +42,7 @@ const REFRESH_COOKIE_OPTIONS = {
   maxAge: 30 * 24 * 60 * 60 * 1000,
 };
 
-const CONTROLLER_ROUTES = {
+const AUTH_ROUTES = {
   LOGIN: 'login',
   ME: 'me',
   PROFILE: 'profile',
@@ -71,7 +71,7 @@ export class AuthController {
     private readonly googleAuthHandler: GoogleAuthHandler,
   ) {}
 
-  @Post(CONTROLLER_ROUTES.LOGIN)
+  @Post(AUTH_ROUTES.LOGIN)
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() dto: LoginDto,
@@ -90,21 +90,19 @@ export class AuthController {
     };
   }
 
-  @SkipThrottle()
-  @Get(CONTROLLER_ROUTES.ME)
+  @Get(AUTH_ROUTES.ME)
   @UseGuards(JwtAuthGuard)
   me(@CurrentUser() user: JwtPayload) {
     return this.getMeHandler.execute(user.sub);
   }
 
-  @SkipThrottle()
-  @Get(CONTROLLER_ROUTES.PROFILE)
+  @Get(AUTH_ROUTES.PROFILE)
   @UseGuards(JwtAuthGuard)
   profile(@CurrentUser() user: JwtPayload) {
     return this.getProfileHandler.execute(user.sub);
   }
 
-  @Post(CONTROLLER_ROUTES.REGISTER)
+  @Post(AUTH_ROUTES.REGISTER)
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { limit: 5, ttl: 900000 } })
   register(@Body() dto: RegisterDto) {
@@ -117,14 +115,14 @@ export class AuthController {
     });
   }
 
-  @Post(CONTROLLER_ROUTES.REQUEST_REGISTRATION)
+  @Post(AUTH_ROUTES.REQUEST_REGISTRATION)
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 3, ttl: 300000 } })
   requestRegistration(@Body() dto: RequestRegistrationDto) {
     return this.requestRegistrationHandler.execute({ email: dto.email });
   }
 
-  @Post(CONTROLLER_ROUTES.COMPLETE_REGISTRATION)
+  @Post(AUTH_ROUTES.COMPLETE_REGISTRATION)
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { limit: 5, ttl: 900000 } })
   async completeRegistration(
@@ -147,7 +145,7 @@ export class AuthController {
     };
   }
 
-  @Post(CONTROLLER_ROUTES.VALIDATE_REGISTRATION_CODE)
+  @Post(AUTH_ROUTES.VALIDATE_REGISTRATION_CODE)
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 10, ttl: 300000 } })
   validateRegistrationCode(@Body() dto: ValidateRegistrationCodeDto) {
@@ -157,7 +155,7 @@ export class AuthController {
     });
   }
 
-  @Post(CONTROLLER_ROUTES.VERIFY_EMAIL)
+  @Post(AUTH_ROUTES.VERIFY_EMAIL)
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 10, ttl: 900000 } })
   verifyEmail(@Body() dto: VerifyEmailDto) {
@@ -167,20 +165,20 @@ export class AuthController {
     });
   }
 
-  @Post(CONTROLLER_ROUTES.RESEND_VERIFICATION)
+  @Post(AUTH_ROUTES.RESEND_VERIFICATION)
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 1, ttl: 60000 } })
   resendVerification(@Body() dto: ResendVerificationDto) {
     return this.resendVerificationHandler.execute({ userId: dto.userId });
   }
 
-  @Get(CONTROLLER_ROUTES.GOOGLE)
+  @Get(AUTH_ROUTES.GOOGLE)
   @UseGuards(AuthGuard('google'))
   googleAuth() {
     // Passport redirige a Google — sin implementación necesaria
   }
 
-  @Get(CONTROLLER_ROUTES.GOOGLE_CALLBACK)
+  @Get(AUTH_ROUTES.GOOGLE_CALLBACK)
   @UseGuards(AuthGuard('google'))
   async googleCallback(
     @Req() req: { user: GoogleProfile },

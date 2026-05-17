@@ -9,6 +9,7 @@ export interface UpdateUserCommand {
   email?: string;
   dni?: string;
   isActive?: boolean;
+  password?: string;
   mustChangePassword?: boolean;
 }
 
@@ -20,12 +21,13 @@ export class UpdateUserHandler {
     const user = await this.repo.findById(command.id);
     if (!user) throw new NotFoundException('Usuario no encontrado');
 
-    user.set({
+    await user.set({
       firstName: command.firstName,
       lastName: command.lastName,
       email: command.email,
       dni: command.dni,
       isActive: command.isActive,
+      password: command.password,
       mustChangePassword: command.mustChangePassword,
     });
 
