@@ -80,6 +80,7 @@ export class User extends UserSchema.class {
     isActive?: boolean;
     password?: string;
     mustChangePassword?: boolean;
+    subscriptionTier?: EGaiaPlan;
   }): Promise<void> {
     if (props.firstName !== undefined) this.firstName = props.firstName?.trim();
     if (props.lastName !== undefined) this.lastName = props.lastName?.trim();
@@ -89,6 +90,8 @@ export class User extends UserSchema.class {
     if (props.isActive !== undefined) this.isActive = props.isActive;
     if (props.mustChangePassword !== undefined)
       this.mustChangePassword = props.mustChangePassword;
+    if (props.subscriptionTier !== undefined)
+      this.subscriptionTier = props.subscriptionTier;
     if (props.password !== undefined) {
       this.passwordHash = await bcrypt.hash(props.password, BCRYPT_ROUNDS);
     }

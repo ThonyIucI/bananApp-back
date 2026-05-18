@@ -10,5 +10,7 @@ export class GaiaUsageDto {
 export class GaiaMessageResponseDto {
   reply!: GaiaReplyDto;
   pendingAction!: null;
+  /** ID del registro analítico — null si la persistencia falló (no crítico) */
+  queryId!: string | null;
   usage!: GaiaUsageDto;
 }

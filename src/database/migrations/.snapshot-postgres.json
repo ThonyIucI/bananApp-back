@@ -1915,6 +1915,25 @@
           "enumItems": [],
           "mappedType": "uuid"
         },
+        "input_mode": {
+          "name": "input_mode",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'text'",
+          "comment": null,
+          "enumItems": [
+            "text",
+            "voice"
+          ],
+          "mappedType": "enum"
+        },
         "category": {
           "name": "category",
           "type": "text",
@@ -2047,6 +2066,16 @@
           "unique": false
         },
         {
+          "keyName": "gaia_queries_input_mode_index",
+          "columnNames": [
+            "input_mode"
+          ],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
           "keyName": "gaia_queries_user_id_created_at_index",
           "columnNames": [
             "user_id",
@@ -2069,6 +2098,12 @@
         }
       ],
       "checks": [
+        {
+          "name": "gaia_queries_input_mode_check",
+          "expression": "\"input_mode\" in ('text', 'voice')",
+          "definition": "check (\"input_mode\" in ('text', 'voice'))",
+          "columnName": "input_mode"
+        },
         {
           "name": "gaia_queries_category_check",
           "expression": "\"category\" in ('FERTILIZERS', 'FOLIAR', 'SOIL', 'PESTS', 'IRRIGATION', 'HARVEST', 'CROP_MANAGEMENT', 'TASK_RECORD', 'GENERAL')",

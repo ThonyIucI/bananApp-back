@@ -7,7 +7,9 @@ import {
   IsBoolean,
   MaxLength,
   MinLength,
+  IsEnum,
 } from 'class-validator';
+import { EGaiaPlan } from '../../domain/user.entity';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -43,4 +45,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsBoolean()
   mustChangePassword?: boolean;
+
+  @IsOptional()
+  @IsEnum(EGaiaPlan, { message: 'Plan no válido' })
+  subscriptionTier?: EGaiaPlan;
 }
