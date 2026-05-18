@@ -7,19 +7,19 @@ import {
 } from '../../domain/llm/llm.service.interface';
 import { EGaiaQueryCategory } from '../../domain/gaia-query-category.enum';
 import { GAIA_CLASSIFICATION_PROMPT } from '../../application/gaia-classification-prompt';
-import { GEMINI_MODEL_ID } from './constants';
 
 const CATEGORY_VALUES = Object.values(EGaiaQueryCategory);
 
 @Injectable()
 export class GeminiLLMService implements ILLMService, OnModuleInit {
   private client!: GoogleGenAI;
+  private geminyModel: string = process.env.GEMINY_LLM_MODEL;
 
   onModuleInit(): void {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GEMINY_LLM_API_KEY;
     if (!apiKey) {
       throw new Error(
-        'GEMINI_API_KEY environment variable is not set. GaIA cannot start.',
+        'GEMINY_LLM_API_KEY environment variable is not set. GaIA cannot start.',
       );
     }
     this.client = new GoogleGenAI({ apiKey });
@@ -43,7 +43,7 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
     ];
 
     const response = await this.client.models.generateContent({
-      model: GEMINI_MODEL_ID,
+      model: this.geminyModel,
       contents,
       config: { systemInstruction: systemPrompt },
     });
@@ -65,7 +65,7 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
   async classifyQuery(text: string): Promise<IGaiaQueryClassification> {
     try {
       const response = await this.client.models.generateContent({
-        model: GEMINI_MODEL_ID,
+        model: this.geminyModel,
         contents: [{ role: 'user', parts: [{ text }] }],
         config: {
           systemInstruction: GAIA_CLASSIFICATION_PROMPT,

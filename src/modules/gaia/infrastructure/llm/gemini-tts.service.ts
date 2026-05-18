@@ -4,7 +4,6 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { EGaiaPlan, User } from '../../../users/domain/user.entity';
 import { GAIA_PLAN_LIMITS, TGaiaPlan } from '../../domain/gaia-plans';
 import { GaiaTtsForbiddenException } from '../../domain/exceptions/gaia-tts-forbidden.exception';
-import { GEMINI_MODEL_ID } from './constants';
 
 /** Female Spanish voice with natural intonation. */
 const TTS_VOICE = 'Kore';
@@ -16,11 +15,11 @@ const TTS_VOICE = 'Kore';
 @Injectable()
 export class GeminiTtsService {
   private readonly client: GoogleGenAI;
-
+  private geminyTTSModel: string = process.env.GEMINY_TTS_MODEL;
   constructor(private readonly em: EntityManager) {
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GEMINY_TTS_API_KEY;
     if (!apiKey) {
-      throw new Error('GEMINI_API_KEY environment variable is not set.');
+      throw new Error('GEMINY_TTS_API_KEY environment variable is not set.');
     }
     this.client = new GoogleGenAI({ apiKey });
   }
@@ -38,7 +37,7 @@ export class GeminiTtsService {
     }
 
     const response = await this.client.models.generateContent({
-      model: GEMINI_MODEL_ID,
+      model: this.geminyTTSModel,
       contents: [{ role: 'user', parts: [{ text }] }],
       config: {
         responseModalities: [Modality.AUDIO],
