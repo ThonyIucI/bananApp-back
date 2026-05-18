@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IUserRepository } from '../domain/user.repository';
 import { NotFoundException } from '../../shared/exceptions/domain.exception';
+import { EGaiaPlan } from '../domain/user.entity';
 
 export interface UpdateUserCommand {
   id: string;
@@ -11,6 +12,7 @@ export interface UpdateUserCommand {
   isActive?: boolean;
   password?: string;
   mustChangePassword?: boolean;
+  subscriptionTier?: EGaiaPlan;
 }
 
 @Injectable()
@@ -29,6 +31,7 @@ export class UpdateUserHandler {
       isActive: command.isActive,
       password: command.password,
       mustChangePassword: command.mustChangePassword,
+      subscriptionTier: command.subscriptionTier,
     });
 
     await this.repo.flush();

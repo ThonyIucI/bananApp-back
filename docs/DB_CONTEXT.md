@@ -280,6 +280,35 @@ Cuotas diarias de interacción con GaIA por usuario. No almacena mensajes ni con
 
 ---
 
+## `gaia_queries`
+
+Registro analítico ligero por cada mensaje enviado a GaIA. No almacena el chat completo — solo metadata para estadísticas de uso y utilidad. La categoría y el resumen se llenan de forma asíncrona tras responder al usuario.
+
+| Column        | Type         | Nullable | Default | Constraints                              | Description                                          |
+|---------------|--------------|----------|---------|------------------------------------------|------------------------------------------------------|
+| `id`          | uuid         | NO       | uuidv7  | PK                                       | UUID v7                                              |
+| `user_id`     | uuid         | NO       |         | FK → users.id CASCADE DELETE             |                                                      |
+| `input_mode`  | text         | NO       | 'text'  | CHECK IN ('text','voice')                | Canal de entrada; 'voice' para QW1.3+                |
+| `category`    | text         | YES      | NULL    | CHECK IN (FERTILIZERS, FOLIAR, SOIL …)   | Categoría agrícola asignada por Gemini (async)       |
+| `topic`       | varchar(120) | YES      | NULL    |                                          | Tema específico en texto libre generado por Gemini   |
+| `summary`     | varchar(300) | YES      | NULL    |                                          | Resumen de una frase de la consulta                  |
+| `feedback`    | text         | YES      | NULL    | CHECK IN ('HELPFUL','NOT_HELPFUL')       | Feedback explícito del usuario (👍/👎)               |
+| `feedback_at` | timestamptz  | YES      | NULL    |                                          | Momento en que el usuario dio feedback               |
+| `created_at`  | timestamptz  | NO       | now()   |                                          |                                                      |
+
+**INDEXES:** `(category)`, `(feedback)`, `(input_mode)`, `(user_id, created_at)`.
+
+Consulta de estadísticas de referencia:
+```sql
+SELECT category,
+       COUNT(*)                                        AS total,
+       COUNT(*) FILTER (WHERE feedback = 'HELPFUL')   AS utiles,
+       COUNT(*) FILTER (WHERE feedback = 'NOT_HELPFUL') AS no_utiles
+FROM gaia_queries GROUP BY category ORDER BY total DESC;
+```
+
+---
+
 ## Planned entities (próximos sprints)
 
 | Entity     | Table        | Sprint | Notas                                           |

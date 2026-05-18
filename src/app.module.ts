@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { Controller, Get } from '@nestjs/common';
 import mikroOrmConfig from './database/mikro-orm.config';
 import { AuthModule } from './modules/auth/auth.module';
@@ -30,6 +31,7 @@ class HealthController {
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 60 }]),
     MikroOrmModule.forRoot(mikroOrmConfig),
+    EventEmitterModule.forRoot(),
     AuthModule,
     RolesModule,
     UsersModule,

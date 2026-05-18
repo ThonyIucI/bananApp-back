@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { User } from '../../users/domain/user.entity';
+import { User, EGaiaPlan } from '../../users/domain/user.entity';
 import { UserCooperative } from '../../cooperatives/domain/user-cooperative.entity';
 import { UserCooperativeRole } from '../../cooperatives/domain/user-cooperative-role.entity';
 import { NotFoundException } from '../../shared/exceptions/domain.exception';
@@ -25,6 +25,7 @@ export interface ProfileResult {
   createdAt: Date;
   cooperatives: ProfileCooperative[];
   userRoles: string[];
+  subscriptionTier: EGaiaPlan;
 }
 
 @Injectable()
@@ -87,6 +88,7 @@ export class GetProfileHandler {
       createdAt: user.createdAt as Date,
       cooperatives,
       userRoles: user?.userRoles?.map((r) => r.key),
+      subscriptionTier: user.subscriptionTier ?? EGaiaPlan.FREE,
     };
   }
 }
