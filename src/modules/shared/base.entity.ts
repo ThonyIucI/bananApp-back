@@ -30,27 +30,11 @@ export const getNewIdV7 = () => uuidv7();
 export const BaseSchema = defineEntity({
   name: 'BaseEntity',
   abstract: true,
-  properties: {
-    id: entityIdV7,
-    createdAt: p.datetime().onCreate(() => new Date()),
-    updatedAt: p
-      .datetime()
-      .onCreate(() => new Date())
-      .onUpdate(() => new Date()),
-    deletedAt: p.datetime().nullable(),
-  },
+  properties: baseProperties(),
 });
 
 export const BaseSchemaWithDeletedAt = defineEntity({
   name: 'BaseEntity',
   abstract: true,
-  properties: {
-    id: entityIdV7,
-    createdAt: p.datetime().onCreate(() => new Date()),
-    updatedAt: p
-      .datetime()
-      .onCreate(() => new Date())
-      .onUpdate(() => new Date()),
-    deletedAt: p.datetime().nullable(),
-  },
+  properties: baseProperties(),
 });
