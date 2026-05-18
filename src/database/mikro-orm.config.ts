@@ -20,6 +20,7 @@ import { EmailVerificationCode } from '../modules/auth/domain/email-verification
 import { RegistrationChallenge } from '../modules/auth/domain/registration-challenge.entity';
 import { UserPlot } from '../modules/plots/domain/user-plot.entity';
 import { GaiaUsage } from '../modules/gaia/domain/gaia-usage.entity';
+import { GaiaQuery } from '../modules/gaia/domain/gaia-query.entity';
 
 export default defineConfig({
   host: process.env.DB_HOST ?? '127.0.0.1',
@@ -46,6 +47,7 @@ export default defineConfig({
     EmailVerificationCode,
     RegistrationChallenge,
     GaiaUsage,
+    GaiaQuery,
   ],
 
   metadataProvider: TsMorphMetadataProvider,

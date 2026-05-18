@@ -5,6 +5,7 @@ import { IGaiaUsageRepository } from './domain/gaia-usage.repository';
 import { MikroOrmGaiaUsageRepository } from './infrastructure/repositories/gaia-usage.mikro-orm.repository';
 import { ILLM_SERVICE } from './domain/llm/llm.service.interface';
 import { GeminiLLMService } from './infrastructure/llm/gemini-llm.service';
+import { GeminiTtsService } from './infrastructure/llm/gemini-tts.service';
 import { GaiaQuotaService } from './application/gaia-quota.service';
 import { GaiaConversationService } from './application/gaia-conversation.service';
 import { GaiaController } from './channels/http/gaia.controller';
@@ -17,6 +18,7 @@ import { User } from '../users/domain/user.entity';
     { provide: ILLM_SERVICE, useClass: GeminiLLMService },
     GaiaQuotaService,
     GaiaConversationService,
+    GeminiTtsService,
   ],
   controllers: [GaiaController],
 })

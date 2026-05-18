@@ -4,8 +4,7 @@ import {
   ILLMService,
   IGaiaHistoryEntry,
 } from '../../domain/llm/llm.service.interface';
-
-const GEMINI_MODEL_ID = 'gemini-2.5-flash';
+import { GEMINI_MODEL_ID } from './constants';
 
 @Injectable()
 export class GeminiLLMService implements ILLMService, OnModuleInit {

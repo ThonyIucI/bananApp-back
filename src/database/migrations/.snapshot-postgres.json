@@ -1880,6 +1880,225 @@
       "nativeEnums": {}
     },
     {
+      "name": "gaia_queries",
+      "schema": "public",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [
+            "FERTILIZERS",
+            "FOLIAR",
+            "SOIL",
+            "PESTS",
+            "IRRIGATION",
+            "HARVEST",
+            "CROP_MANAGEMENT",
+            "TASK_RECORD",
+            "GENERAL"
+          ],
+          "mappedType": "enum"
+        },
+        "topic": {
+          "name": "topic",
+          "type": "varchar(120)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 120,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "summary": {
+          "name": "summary",
+          "type": "varchar(300)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 300,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "feedback": {
+          "name": "feedback",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [
+            "HELPFUL",
+            "NOT_HELPFUL"
+          ],
+          "mappedType": "enum"
+        },
+        "feedback_at": {
+          "name": "feedback_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        }
+      },
+      "indexes": [
+        {
+          "keyName": "gaia_queries_category_index",
+          "columnNames": [
+            "category"
+          ],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "gaia_queries_feedback_index",
+          "columnNames": [
+            "feedback"
+          ],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "gaia_queries_user_id_created_at_index",
+          "columnNames": [
+            "user_id",
+            "created_at"
+          ],
+          "composite": true,
+          "constraint": false,
+          "primary": false,
+          "unique": false
+        },
+        {
+          "keyName": "gaia_queries_pkey",
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [
+        {
+          "name": "gaia_queries_category_check",
+          "expression": "\"category\" in ('FERTILIZERS', 'FOLIAR', 'SOIL', 'PESTS', 'IRRIGATION', 'HARVEST', 'CROP_MANAGEMENT', 'TASK_RECORD', 'GENERAL')",
+          "definition": "check (\"category\" in ('FERTILIZERS', 'FOLIAR', 'SOIL', 'PESTS', 'IRRIGATION', 'HARVEST', 'CROP_MANAGEMENT', 'TASK_RECORD', 'GENERAL'))",
+          "columnName": "category"
+        },
+        {
+          "name": "gaia_queries_feedback_check",
+          "expression": "\"feedback\" in ('HELPFUL', 'NOT_HELPFUL')",
+          "definition": "check (\"feedback\" in ('HELPFUL', 'NOT_HELPFUL'))",
+          "columnName": "feedback"
+        }
+      ],
+      "foreignKeys": {
+        "gaia_queries_user_id_foreign": {
+          "constraintName": "gaia_queries_user_id_foreign",
+          "columnNames": [
+            "user_id"
+          ],
+          "localTableName": "public.gaia_queries",
+          "referencedColumnNames": [
+            "id"
+          ],
+          "referencedTableName": "public.users",
+          "deleteRule": "cascade"
+        }
+      },
+      "nativeEnums": {}
+    },
+    {
       "name": "email_verification_codes",
       "schema": "public",
       "columns": {
