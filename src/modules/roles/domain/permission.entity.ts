@@ -20,6 +20,11 @@ export const PERMISSION_KEYS = [
   'sanction_manage',
   'harvest_read',
   'harvest_manage',
+  'field_task_list',
+  'field_task_create',
+  'field_task_update',
+  'field_task_delete',
+  'crop_type_list',
 ] as const;
 
 export type PermissionKey = (typeof PERMISSION_KEYS)[number];

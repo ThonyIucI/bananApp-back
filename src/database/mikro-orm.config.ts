@@ -21,6 +21,11 @@ import { RegistrationChallenge } from '../modules/auth/domain/registration-chall
 import { UserPlot } from '../modules/plots/domain/user-plot.entity';
 import { GaiaUsage } from '../modules/gaia/domain/gaia-usage.entity';
 import { GaiaQuery } from '../modules/gaia/domain/gaia-query.entity';
+import { CropType } from '../modules/crop-types/domain/crop-type.entity';
+import { TaskType } from '../modules/field-tasks/domain/task-type.entity';
+import { TaskTypeDetailSchema } from '../modules/field-tasks/domain/task-type-detail-schema.entity';
+import { FieldTask } from '../modules/field-tasks/domain/field-task.entity';
+import { FieldTaskDetail } from '../modules/field-tasks/domain/field-task-detail.entity';
 
 export default defineConfig({
   host: process.env.DB_HOST ?? '127.0.0.1',
@@ -48,6 +53,11 @@ export default defineConfig({
     RegistrationChallenge,
     GaiaUsage,
     GaiaQuery,
+    CropType,
+    TaskType,
+    TaskTypeDetailSchema,
+    FieldTask,
+    FieldTaskDetail,
   ],
 
   metadataProvider: TsMorphMetadataProvider,
