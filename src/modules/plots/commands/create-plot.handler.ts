@@ -42,7 +42,8 @@ export class CreatePlotHandler {
       const sector = cmd.sectorId
         ? await this.sectorRepo.findById(cmd.sectorId)
         : null;
-      if (cmd.sectorId && !sector) throw new NotFoundException('Sector no encontrado');
+      if (cmd.sectorId && !sector)
+        throw new NotFoundException('Sector no encontrado');
 
       const ownerUser = await this.userRepo.findById(cmd.ownerUserId);
       if (!ownerUser)
@@ -63,6 +64,7 @@ export class CreatePlotHandler {
         areaHectares: cmd.areaHectares,
         cadastralCode: cmd.cadastralCode,
       });
+      console.log(plot);
 
       em.persist(plot);
 
