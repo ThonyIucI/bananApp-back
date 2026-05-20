@@ -60,6 +60,24 @@ export class UpdatePlotDto {
   cadastralCode?: string | null;
 
   @IsOptional()
+  @IsNumber(
+    { maxDecimalPlaces: 6 },
+    { message: 'La latitud debe ser un número válido' },
+  )
+  @Min(-90, { message: 'La latitud debe ser mayor o igual a -90' })
+  @Max(90, { message: 'La latitud debe ser menor o igual a 90' })
+  latitude?: number;
+
+  @IsOptional()
+  @IsNumber(
+    { maxDecimalPlaces: 6 },
+    { message: 'La longitud debe ser un número válido' },
+  )
+  @Min(-180, { message: 'La longitud debe ser mayor o igual a -180' })
+  @Max(180, { message: 'La longitud debe ser menor o igual a 180' })
+  longitude?: number;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => UpdateSubPlotInlineDto)

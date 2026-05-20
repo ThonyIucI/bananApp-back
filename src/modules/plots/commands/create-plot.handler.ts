@@ -14,6 +14,8 @@ export interface CreatePlotCommand {
   workerUserId?: string;
   areaHectares: number;
   cadastralCode?: string;
+  latitude: number;
+  longitude: number;
   subPlots?: {
     name: string;
     responsibleUserId?: string;
@@ -63,8 +65,9 @@ export class CreatePlotHandler {
         workerUser,
         areaHectares: cmd.areaHectares,
         cadastralCode: cmd.cadastralCode,
+        latitude: cmd.latitude,
+        longitude: cmd.longitude,
       });
-      console.log(plot);
 
       em.persist(plot);
 

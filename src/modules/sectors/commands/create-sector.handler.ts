@@ -15,6 +15,8 @@ export interface CreateSectorPlotInput {
   workerUserId?: string;
   areaHectares: number;
   cadastralCode?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface CreateSectorCommand {
@@ -85,6 +87,8 @@ export class CreateSectorHandler {
             workerUser,
             areaHectares: input.areaHectares,
             cadastralCode: input.cadastralCode,
+            latitude: input.latitude,
+            longitude: input.longitude,
           });
           plots.push(plot);
         }
