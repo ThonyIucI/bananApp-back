@@ -16,6 +16,8 @@ const PlotSchema = defineEntity({
     workerUser: () => p.manyToOne(User).nullable().deleteRule('set null'),
     areaHectares: p.decimal('number').precision(8).scale(4),
     cadastralCode: p.string().length(50).nullable(),
+    latitude: p.decimal('number').precision(9).scale(6).nullable(),
+    longitude: p.decimal('number').precision(9).scale(6).nullable(),
     subPlots: () => p.oneToMany(SubPlot).mappedBy((im) => im.plot),
   },
 });
@@ -30,6 +32,8 @@ export class Plot extends PlotSchema.class {
     workerUser?: User;
     areaHectares: number;
     cadastralCode?: string;
+    latitude: number;
+    longitude: number;
   }): Plot {
     const plot = new Plot();
     plot.name = props.name.trim();
@@ -38,6 +42,8 @@ export class Plot extends PlotSchema.class {
     plot.workerUser = props.workerUser ?? null;
     plot.areaHectares = props.areaHectares;
     plot.cadastralCode = props.cadastralCode?.trim() ?? null;
+    plot.latitude = props.latitude;
+    plot.longitude = props.longitude;
     plot.validate();
     return plot;
   }
@@ -49,6 +55,8 @@ export class Plot extends PlotSchema.class {
     workerUser?: User | null;
     areaHectares?: number;
     cadastralCode?: string | null;
+    latitude?: number;
+    longitude?: number;
   }): void {
     if (props.name !== undefined) this.name = props.name.trim();
     if (props.sector !== undefined) this.sector = props.sector;
@@ -58,6 +66,8 @@ export class Plot extends PlotSchema.class {
       this.areaHectares = props.areaHectares;
     if (props.cadastralCode !== undefined)
       this.cadastralCode = props.cadastralCode;
+    if (props.latitude !== undefined) this.latitude = props.latitude;
+    if (props.longitude !== undefined) this.longitude = props.longitude;
     this.validate();
   }
 
@@ -77,6 +87,18 @@ export class Plot extends PlotSchema.class {
       throw new ValidationException(
         'El área debe ser un número positivo',
         'areaHectares',
+      );
+    }
+    if (this.latitude != null && (this.latitude < -90 || this.latitude > 90)) {
+      throw new ValidationException(
+        'La latitud debe estar entre -90 y 90',
+        'latitude',
+      );
+    }
+    if (this.longitude != null && (this.longitude < -180 || this.longitude > 180)) {
+      throw new ValidationException(
+        'La longitud debe estar entre -180 y 180',
+        'longitude',
       );
     }
   }

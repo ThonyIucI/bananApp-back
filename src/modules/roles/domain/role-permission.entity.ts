@@ -6,7 +6,7 @@ import { entityIdV7 } from '../../shared/base.entity';
 const RolePermissionSchema = defineEntity({
   name: 'RolePermission',
   properties: {
-    id: entityIdV7,
+    id: entityIdV7(),
     role: () => p.manyToOne(Role).deleteRule('cascade'),
     permission: () => p.manyToOne(Permission).deleteRule('cascade'),
   },

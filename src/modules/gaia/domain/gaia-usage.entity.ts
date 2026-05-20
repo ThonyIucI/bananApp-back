@@ -6,7 +6,7 @@ const GaiaUsageSchema = defineEntity({
   name: 'GaiaUsage',
   tableName: 'gaia_usages',
   properties: {
-    id: entityIdV7,
+    id: entityIdV7(),
     user: () => p.manyToOne(User).deleteRule('cascade'),
     /** ISO date string YYYY-MM-DD — one row per user per day */
     usageDate: p.string().length(10),
