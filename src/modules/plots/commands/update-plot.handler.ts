@@ -20,6 +20,8 @@ export interface UpdatePlotCommand {
   workerUserId?: string | null;
   areaHectares?: number;
   cadastralCode?: string | null;
+  latitude?: number;
+  longitude?: number;
   subPlots?: {
     id?: string;
     name: string;
@@ -74,6 +76,8 @@ export class UpdatePlotHandler {
         workerUser,
         areaHectares: cmd.areaHectares,
         cadastralCode: cmd.cadastralCode,
+        latitude: cmd.latitude,
+        longitude: cmd.longitude,
       });
 
       // 4. Sincronizar Subplots (SubPlots)

@@ -7,7 +7,7 @@ const UserRoleSchema = defineEntity({
   name: 'UserRole',
   tableName: 'user_roles',
   properties: {
-    id: entityIdV7,
+    id: entityIdV7(),
     user: () => p.manyToOne(User).deleteRule('cascade'),
     role: () => p.manyToOne(Role).deleteRule('cascade'),
   },

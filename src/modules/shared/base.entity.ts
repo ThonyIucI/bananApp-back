@@ -19,10 +19,12 @@ export function baseProperties() {
   };
 }
 
-export const entityIdV7 = p
-  .uuid()
-  .primary()
-  .onCreate(() => uuidv7());
+/** Returns a fresh uuid v7 primary key builder. Call as a function — shared instances get mutated by MikroORM. */
+export const entityIdV7 = () =>
+  p
+    .uuid()
+    .primary()
+    .onCreate(() => uuidv7());
 
 /**Implement when need id in memory */
 export const getNewIdV7 = () => uuidv7();
