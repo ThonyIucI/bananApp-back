@@ -52,12 +52,18 @@ export class CreatePlotDto {
   @Length(1, 50)
   cadastralCode?: string;
 
-  @IsNumber({ maxDecimalPlaces: 6 }, { message: 'La latitud debe ser un número válido' })
+  @IsNumber(
+    { maxDecimalPlaces: 6 },
+    { message: 'La latitud debe ser un número válido' },
+  )
   @Min(-90, { message: 'La latitud debe ser mayor o igual a -90' })
   @Max(90, { message: 'La latitud debe ser menor o igual a 90' })
   latitude: number;
 
-  @IsNumber({ maxDecimalPlaces: 6 }, { message: 'La longitud debe ser un número válido' })
+  @IsNumber(
+    { maxDecimalPlaces: 6 },
+    { message: 'La longitud debe ser un número válido' },
+  )
   @Min(-180, { message: 'La longitud debe ser mayor o igual a -180' })
   @Max(180, { message: 'La longitud debe ser menor o igual a 180' })
   longitude: number;

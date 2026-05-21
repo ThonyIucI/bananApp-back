@@ -95,7 +95,10 @@ export class Plot extends PlotSchema.class {
         'latitude',
       );
     }
-    if (this.longitude != null && (this.longitude < -180 || this.longitude > 180)) {
+    if (
+      this.longitude != null &&
+      (this.longitude < -180 || this.longitude > 180)
+    ) {
       throw new ValidationException(
         'La longitud debe estar entre -180 y 180',
         'longitude',
