@@ -47,6 +47,7 @@ export class PlotsController {
       cadastralCode: dto.cadastralCode,
       latitude: dto.latitude,
       longitude: dto.longitude,
+      altitude: dto.altitude,
       subPlots: dto.subPlots,
     });
   }
@@ -77,6 +78,7 @@ export class PlotsController {
       cadastralCode: dto.cadastralCode,
       latitude: dto.latitude,
       longitude: dto.longitude,
+      altitude: dto.altitude,
       subPlots: dto.subPlots,
     });
   }

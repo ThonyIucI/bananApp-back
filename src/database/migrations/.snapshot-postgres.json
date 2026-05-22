@@ -1327,6 +1327,21 @@
           "default": null,
           "comment": null,
           "enumItems": []
+        },
+        "altitude": {
+          "name": "altitude",
+          "type": "numeric(8,2)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": 8,
+          "scale": 2,
+          "default": null,
+          "comment": null,
+          "enumItems": []
         }
       },
       "indexes": [

@@ -78,6 +78,15 @@ export class UpdatePlotDto {
   longitude?: number;
 
   @IsOptional()
+  @IsNumber(
+    { maxDecimalPlaces: 2 },
+    { message: 'La altitud debe ser un número válido' },
+  )
+  @Min(-500, { message: 'La altitud debe ser mayor o igual a -500' })
+  @Max(9000, { message: 'La altitud debe ser menor o igual a 9000' })
+  altitude?: number | null;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => UpdateSubPlotInlineDto)
