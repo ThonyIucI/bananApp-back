@@ -16,6 +16,7 @@ export interface CreatePlotCommand {
   cadastralCode?: string;
   latitude: number;
   longitude: number;
+  altitude?: number | null;
   subPlots?: {
     name: string;
     responsibleUserId?: string;
@@ -67,6 +68,7 @@ export class CreatePlotHandler {
         cadastralCode: cmd.cadastralCode,
         latitude: cmd.latitude,
         longitude: cmd.longitude,
+        altitude: cmd.altitude,
       });
 
       em.persist(plot);

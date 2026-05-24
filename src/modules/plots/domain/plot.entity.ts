@@ -18,6 +18,7 @@ const PlotSchema = defineEntity({
     cadastralCode: p.string().length(50).nullable(),
     latitude: p.decimal('number').precision(9).scale(6).nullable(),
     longitude: p.decimal('number').precision(9).scale(6).nullable(),
+    altitude: p.decimal('number').precision(8).scale(2).nullable(),
     subPlots: () => p.oneToMany(SubPlot).mappedBy((im) => im.plot),
   },
 });
@@ -34,6 +35,7 @@ export class Plot extends PlotSchema.class {
     cadastralCode?: string;
     latitude: number;
     longitude: number;
+    altitude?: number | null;
   }): Plot {
     const plot = new Plot();
     plot.name = props.name.trim();
@@ -44,6 +46,7 @@ export class Plot extends PlotSchema.class {
     plot.cadastralCode = props.cadastralCode?.trim() ?? null;
     plot.latitude = props.latitude;
     plot.longitude = props.longitude;
+    plot.altitude = props.altitude ?? null;
     plot.validate();
     return plot;
   }
@@ -57,6 +60,7 @@ export class Plot extends PlotSchema.class {
     cadastralCode?: string | null;
     latitude?: number;
     longitude?: number;
+    altitude?: number | null;
   }): void {
     if (props.name !== undefined) this.name = props.name.trim();
     if (props.sector !== undefined) this.sector = props.sector;
@@ -68,6 +72,7 @@ export class Plot extends PlotSchema.class {
       this.cadastralCode = props.cadastralCode;
     if (props.latitude !== undefined) this.latitude = props.latitude;
     if (props.longitude !== undefined) this.longitude = props.longitude;
+    if (props.altitude !== undefined) this.altitude = props.altitude;
     this.validate();
   }
 
@@ -102,6 +107,15 @@ export class Plot extends PlotSchema.class {
       throw new ValidationException(
         'La longitud debe estar entre -180 y 180',
         'longitude',
+      );
+    }
+    if (
+      this.altitude != null &&
+      (this.altitude < -500 || this.altitude > 9000)
+    ) {
+      throw new ValidationException(
+        'La altitud debe estar entre -500 y 9000 metros',
+        'altitude',
       );
     }
   }
