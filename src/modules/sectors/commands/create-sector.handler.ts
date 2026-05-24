@@ -17,6 +17,7 @@ export interface CreateSectorPlotInput {
   cadastralCode?: string;
   latitude?: number;
   longitude?: number;
+  altitude?: number | null;
 }
 
 export interface CreateSectorCommand {
@@ -89,6 +90,7 @@ export class CreateSectorHandler {
             cadastralCode: input.cadastralCode,
             latitude: input.latitude,
             longitude: input.longitude,
+            altitude: input.altitude,
           });
           plots.push(plot);
         }
