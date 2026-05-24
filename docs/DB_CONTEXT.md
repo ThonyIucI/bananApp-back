@@ -198,6 +198,8 @@ Parcela agrícola perteneciente a un sector.
 | `worker_user_id` | uuid           | YES      | NULL    | FK → users.id SET NULL            |
 | `area_hectares`  | numeric(8,4)   | NO       |         |                                   |
 | `cadastral_code` | varchar(50)    | YES      | NULL    |                                   |
+| `latitude`       | decimal(9,6)   | YES      | NULL    | Latitud GPS [-90, 90]             |
+| `longitude`      | decimal(9,6)   | YES      | NULL    | Longitud GPS [-180, 180]          |
 | `created_at`     | timestamptz    | NO       | now()   |                                   |
 | `updated_at`     | timestamptz    | NO       | now()   |                                   |
 | `deleted_at`     | timestamptz    | YES      | NULL    | Soft delete                       |

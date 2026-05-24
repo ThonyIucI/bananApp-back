@@ -1,14 +1,13 @@
 import { defineEntity, p } from '@mikro-orm/core';
-import { BaseSchema, entityIdV7 } from '../../shared/base.entity';
+import { entityIdV7 } from '../../shared/base.entity';
 import { User } from '../../users/domain/user.entity';
 import { Role } from './role.entity';
 
 const UserRoleSchema = defineEntity({
   name: 'UserRole',
   tableName: 'user_roles',
-  extends: BaseSchema,
   properties: {
-    id: entityIdV7,
+    id: entityIdV7(),
     user: () => p.manyToOne(User).deleteRule('cascade'),
     role: () => p.manyToOne(Role).deleteRule('cascade'),
   },

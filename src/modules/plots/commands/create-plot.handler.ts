@@ -14,6 +14,9 @@ export interface CreatePlotCommand {
   workerUserId?: string;
   areaHectares: number;
   cadastralCode?: string;
+  latitude: number;
+  longitude: number;
+  altitude?: number | null;
   subPlots?: {
     name: string;
     responsibleUserId?: string;
@@ -42,7 +45,8 @@ export class CreatePlotHandler {
       const sector = cmd.sectorId
         ? await this.sectorRepo.findById(cmd.sectorId)
         : null;
-      if (cmd.sectorId && !sector) throw new NotFoundException('Sector no encontrado');
+      if (cmd.sectorId && !sector)
+        throw new NotFoundException('Sector no encontrado');
 
       const ownerUser = await this.userRepo.findById(cmd.ownerUserId);
       if (!ownerUser)
@@ -62,6 +66,9 @@ export class CreatePlotHandler {
         workerUser,
         areaHectares: cmd.areaHectares,
         cadastralCode: cmd.cadastralCode,
+        latitude: cmd.latitude,
+        longitude: cmd.longitude,
+        altitude: cmd.altitude,
       });
 
       em.persist(plot);

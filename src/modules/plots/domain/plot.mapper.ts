@@ -10,6 +10,8 @@ export interface PlotLookupDto {
   ownerUser: User;
   areaHectares: number;
   subPlotsQuantity: number;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export class PlotMapper {
@@ -21,6 +23,8 @@ export class PlotMapper {
       ownerUser: plot?.ownerUser,
       areaHectares: Number(plot?.areaHectares ?? 0),
       subPlotsQuantity: plot?.subPlots?.length ?? 0,
+      latitude: plot.latitude != null ? Number(plot.latitude) : null,
+      longitude: plot.longitude != null ? Number(plot.longitude) : null,
     };
   }
 }

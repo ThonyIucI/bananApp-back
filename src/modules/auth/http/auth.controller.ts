@@ -9,7 +9,6 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
 import { Response } from 'express';
 import { LoginDto } from './dtos/login.dto';
@@ -29,6 +28,7 @@ import { RequestRegistrationHandler } from '../commands/request-registration.han
 import { CompleteRegistrationHandler } from '../commands/complete-registration.handler';
 import { ValidateRegistrationCodeHandler } from '../commands/validate-registration-code.handler';
 import { GoogleAuthHandler } from '../queries/google-auth.handler';
+import { GoogleOAuthGuard } from '../infrastructure/google-oauth.guard';
 import { JwtAuthGuard } from '../../shared/guards/jwt-auth.guard';
 import { CurrentUser } from '../../shared/decorators/current-user.decorator';
 import { JwtPayload } from '../infrastructure/jwt.strategy';
@@ -172,13 +172,13 @@ export class AuthController {
   }
 
   @Get(AUTH_ROUTES.GOOGLE)
-  @UseGuards(AuthGuard('google'))
+  @UseGuards(GoogleOAuthGuard)
   googleAuth() {
-    // Passport redirige a Google — sin implementación necesaria
+    // Passport redirects to Google — login_hint/prompt are forwarded by GoogleOAuthGuard.
   }
 
   @Get(AUTH_ROUTES.GOOGLE_CALLBACK)
-  @UseGuards(AuthGuard('google'))
+  @UseGuards(GoogleOAuthGuard)
   async googleCallback(
     @Req() req: { user: GoogleProfile },
     @Res() res: Response,

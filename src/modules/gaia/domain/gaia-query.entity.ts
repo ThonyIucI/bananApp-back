@@ -9,7 +9,7 @@ const GaiaQuerySchema = defineEntity({
   name: 'GaiaQuery',
   tableName: 'gaia_queries',
   properties: {
-    id: entityIdV7,
+    id: entityIdV7(),
     user: () => p.manyToOne(User).deleteRule('cascade'),
     /** 'text' for typed messages, 'voice' for audio transcriptions (QW1.3+) */
     inputMode: p

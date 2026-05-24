@@ -26,6 +26,7 @@ export interface ProfileResult {
   cooperatives: ProfileCooperative[];
   userRoles: string[];
   subscriptionTier: EGaiaPlan;
+  pictureUrl: string | null;
 }
 
 @Injectable()
@@ -89,6 +90,7 @@ export class GetProfileHandler {
       cooperatives,
       userRoles: user?.userRoles?.map((r) => r.key),
       subscriptionTier: user.subscriptionTier ?? EGaiaPlan.FREE,
+      pictureUrl: user.avatarUrl ?? null,
     };
   }
 }

@@ -45,6 +45,9 @@ export class PlotsController {
       workerUserId: dto.workerUserId,
       areaHectares: dto.areaHectares,
       cadastralCode: dto.cadastralCode,
+      latitude: dto.latitude,
+      longitude: dto.longitude,
+      altitude: dto.altitude,
       subPlots: dto.subPlots,
     });
   }
@@ -73,6 +76,9 @@ export class PlotsController {
       workerUserId: dto.workerUserId,
       areaHectares: dto.areaHectares,
       cadastralCode: dto.cadastralCode,
+      latitude: dto.latitude,
+      longitude: dto.longitude,
+      altitude: dto.altitude,
       subPlots: dto.subPlots,
     });
   }
