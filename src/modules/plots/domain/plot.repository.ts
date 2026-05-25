@@ -11,11 +11,19 @@ export interface PlotFilters {
   offset?: number;
 }
 
+export interface PlotStats {
+  totalPlots: number;
+  totalAreaHa: number;
+}
+
 export abstract class IPlotRepository {
   abstract findById(id: string): Promise<Plot | null>;
   abstract findAll(
     filters?: PlotFilters,
   ): Promise<{ items: Plot[]; total: number }>;
+  abstract getStats(
+    filters?: Pick<PlotFilters, 'cooperativeId' | 'ownerUserId' | 'sectorId'>,
+  ): Promise<PlotStats>;
   abstract persist(plot: Plot): void;
   abstract persistMany(plots: Plot[]): void;
   abstract remove(plot: Plot): void;

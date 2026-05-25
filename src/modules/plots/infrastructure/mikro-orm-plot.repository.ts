@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Plot } from '../domain/plot.entity';
-import { IPlotRepository, PlotFilters } from '../domain/plot.repository';
+import { IPlotRepository, PlotFilters, PlotStats } from '../domain/plot.repository';
 import { UserPlot } from '../domain/user-plot.entity';
 
 const PLOT_POPULATE = [
@@ -69,6 +69,46 @@ export class MikroOrmPlotRepository extends IPlotRepository {
     });
 
     return { items: items as unknown as Plot[], total };
+  }
+
+  async getStats(
+    filters: Pick<PlotFilters, 'cooperativeId' | 'ownerUserId' | 'sectorId'> = {},
+  ): Promise<PlotStats> {
+    const wheres: string[] = ['p.deleted_at IS NULL'];
+    const params: unknown[] = [];
+    let joinSector = '';
+
+    if (filters.sectorId) {
+      params.push(filters.sectorId);
+      wheres.push(`p.sector_id = ?`);
+    }
+    if (filters.ownerUserId) {
+      params.push(filters.ownerUserId);
+      wheres.push(`p.owner_user_id = ?`);
+    }
+    if (filters.cooperativeId) {
+      joinSector = 'INNER JOIN "sectors" s ON s.id = p.sector_id';
+      params.push(filters.cooperativeId);
+      wheres.push(`s.cooperative_id = ?`);
+    }
+
+    const sql = `
+      SELECT COUNT(*)::int AS total,
+             COALESCE(SUM(p.area_hectares), 0)::float AS area
+      FROM "plots" p
+      ${joinSector}
+      WHERE ${wheres.join(' AND ')}
+    `;
+
+    const rows = (await this.em.getConnection().execute(sql, params)) as Array<{
+      total: number;
+      area: number;
+    }>;
+    const row = rows?.[0];
+    return {
+      totalPlots: Number(row?.total ?? 0),
+      totalAreaHa: Number(row?.area ?? 0),
+    };
   }
 
   persist(plot: Plot): void {

@@ -19,6 +19,7 @@ import { AssignUserPlotsHandler } from './commands/assign-user-plots.handler';
 import { UnassignUserPlotsHandler } from './commands/unassign-user-plots.handler';
 import { FindPlotByIdHandler } from './queries/find-plot-by-id.handler';
 import { ListPlotsHandler } from './queries/list-plots.handler';
+import { GetPlotStatsHandler } from './queries/get-plot-stats.handler';
 import { FindSubPlotByIdHandler } from './queries/find-sub-plot-by-id.handler';
 import { ListSubPlotsHandler } from './queries/list-sub-plots.handler';
 import { ListUserPlotsHandler } from './queries/list-user-plots.handler';
@@ -52,6 +53,7 @@ import { UsersModule } from '../users/users.module';
     UnassignUserPlotsHandler,
     FindPlotByIdHandler,
     ListPlotsHandler,
+    GetPlotStatsHandler,
     FindSubPlotByIdHandler,
     ListSubPlotsHandler,
     ListUserPlotsHandler,

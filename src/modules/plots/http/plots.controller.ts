@@ -20,6 +20,7 @@ import { UpdatePlotHandler } from '../commands/update-plot.handler';
 import { DeletePlotHandler } from '../commands/delete-plot.handler';
 import { FindPlotByIdHandler } from '../queries/find-plot-by-id.handler';
 import { ListPlotsHandler } from '../queries/list-plots.handler';
+import { GetPlotStatsHandler } from '../queries/get-plot-stats.handler';
 import { CreatePlotDto } from './dtos/create-plot.dto';
 import { UpdatePlotDto } from './dtos/update-plot.dto';
 import { ListPlotsDto } from './dtos/list-plots.dto';
@@ -33,7 +34,18 @@ export class PlotsController {
     private readonly deleteHandler: DeletePlotHandler,
     private readonly findByIdHandler: FindPlotByIdHandler,
     private readonly listHandler: ListPlotsHandler,
+    private readonly statsHandler: GetPlotStatsHandler,
   ) {}
+
+  @Get('stats')
+  @RequirePermission('plot_read')
+  stats(
+    @Query('cooperativeId') cooperativeId?: string,
+    @Query('ownerUserId') ownerUserId?: string,
+    @Query('sectorId') sectorId?: string,
+  ) {
+    return this.statsHandler.execute({ cooperativeId, ownerUserId, sectorId });
+  }
 
   @Post()
   @RequirePermission('plot_manage')
