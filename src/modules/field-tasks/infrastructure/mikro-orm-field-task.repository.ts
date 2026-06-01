@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { FieldTask } from '../domain/field-task.entity';
-import { FieldTaskDetail } from '../domain/field-task-detail.entity';
-import { IFieldTaskRepository, TFieldTaskFilters } from '../domain/field-task.repository';
+import {
+  IFieldTaskRepository,
+  TFieldTaskFilters,
+} from '../domain/field-task.repository';
 
 @Injectable()
 export class MikroOrmFieldTaskRepository extends IFieldTaskRepository {
@@ -15,18 +17,29 @@ export class MikroOrmFieldTaskRepository extends IFieldTaskRepository {
       FieldTask,
       { id, deletedAt: null },
       {
-        populate: ['plot', 'subPlot', 'taskType', 'taskType.detailSchemas', 'performedByUser', 'details'],
+        populate: [
+          'plot',
+          'subPlot',
+          'taskType',
+          'taskType.detailSchemas',
+          'taskType.detailSchemas.detailOptions',
+          'performedByUser',
+          'details',
+        ],
       },
     );
   }
 
-  async findAll(filters: TFieldTaskFilters = {}): Promise<{ items: FieldTask[]; total: number }> {
+  async findAll(
+    filters: TFieldTaskFilters = {},
+  ): Promise<{ items: FieldTask[]; total: number }> {
     const where: Record<string, unknown> = { deletedAt: null };
 
     if (filters.plotId) where['plot'] = { id: filters.plotId };
     if (filters.subPlotId) where['subPlot'] = { id: filters.subPlotId };
     if (filters.taskTypeKey) where['taskType'] = { key: filters.taskTypeKey };
-    if (filters.performedByUserId) where['performedByUser'] = { id: filters.performedByUserId };
+    if (filters.performedByUserId)
+      where['performedByUser'] = { id: filters.performedByUserId };
 
     if (filters.from || filters.to) {
       const dateFilter: Record<string, Date> = {};

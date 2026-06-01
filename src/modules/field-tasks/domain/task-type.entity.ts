@@ -31,7 +31,11 @@ export class TaskType extends TaskTypeSchema.class {
   declare cropTypes: Collection<CropType>;
   declare detailSchemas: Collection<TaskTypeDetailSchema>;
 
-  static make(props: { key: string; label: string; isActive?: boolean }): TaskType {
+  static make(props: {
+    key: string;
+    label: string;
+    isActive?: boolean;
+  }): TaskType {
     const tt = new TaskType();
     tt.key = props.key;
     tt.label = props.label;

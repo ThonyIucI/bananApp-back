@@ -32,6 +32,11 @@ export class UpdateFieldTaskDto {
   cost?: number | null;
 
   @IsOptional()
+  @IsNumber()
+  @Min(0)
+  laborDays?: number | null;
+
+  @IsOptional()
   @IsString()
   @MaxLength(1000)
   notes?: string | null;

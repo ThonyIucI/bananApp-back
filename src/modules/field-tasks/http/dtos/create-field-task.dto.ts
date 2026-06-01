@@ -1,6 +1,6 @@
 import {
+  Allow,
   IsArray,
-  IsBoolean,
   IsDateString,
   IsNotEmpty,
   IsNumber,
@@ -19,27 +19,12 @@ export class FieldTaskDetailDto {
   @MaxLength(100)
   detailKey: string;
 
-  @IsOptional()
-  @IsString()
-  valueText?: string | null;
-
-  @IsOptional()
-  @IsNumber()
-  valueNumeric?: number | null;
-
-  @IsOptional()
-  @IsDateString()
-  valueDate?: string | null;
-
-  @IsOptional()
-  @IsBoolean()
-  valueBoolean?: boolean | null;
+  /** Raw value — the handler validates and encodes it according to the detail schema's valueType. */
+  @Allow()
+  value: string | number | boolean | null;
 }
 
 export class CreateFieldTaskDto {
-  @IsUUID()
-  plotId: string;
-
   @IsString()
   @IsNotEmpty()
   @MaxLength(100)
@@ -64,6 +49,11 @@ export class CreateFieldTaskDto {
   @IsNumber()
   @Min(0)
   cost?: number | null;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  laborDays?: number | null;
 
   @IsOptional()
   @IsString()

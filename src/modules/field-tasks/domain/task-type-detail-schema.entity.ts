@@ -1,6 +1,7 @@
-import { defineEntity, p } from '@mikro-orm/core';
+import { Collection, defineEntity, p } from '@mikro-orm/core';
 import { entityIdV7 } from '../../shared/base.entity';
 import { TaskType } from './task-type.entity';
+import { TaskTypeDetailOption } from './task-type-detail-option.entity';
 
 export enum EDetailValueType {
   TEXT = 'text',
@@ -14,15 +15,16 @@ const TaskTypeDetailSchemaSchema = defineEntity({
   name: 'TaskTypeDetailSchema',
   tableName: 'task_type_detail_schemas',
   properties: {
-    id: entityIdV7,
+    id: entityIdV7(),
     taskType: () => p.manyToOne(TaskType).deleteRule('cascade'),
     detailKey: p.string().length(100),
     label: p.string().length(200),
     valueType: p.enum(() => EDetailValueType),
     isRequired: p.boolean().default(true),
-    enumOptions: p.json().nullable(),
     validationRules: p.json().nullable(),
     sortOrder: p.integer().default(0),
+    detailOptions: () =>
+      p.oneToMany(TaskTypeDetailOption).mappedBy((o) => o.detailSchema),
     createdAt: p.datetime().onCreate(() => new Date()),
     updatedAt: p
       .datetime()
@@ -33,13 +35,14 @@ const TaskTypeDetailSchemaSchema = defineEntity({
 });
 
 export class TaskTypeDetailSchema extends TaskTypeDetailSchemaSchema.class {
+  declare detailOptions: Collection<TaskTypeDetailOption>;
+
   static make(props: {
     taskType: TaskType;
     detailKey: string;
     label: string;
     valueType: EDetailValueType;
     isRequired?: boolean;
-    enumOptions?: string[] | null;
     validationRules?: Record<string, unknown> | null;
     sortOrder?: number;
   }): TaskTypeDetailSchema {
@@ -49,7 +52,6 @@ export class TaskTypeDetailSchema extends TaskTypeDetailSchemaSchema.class {
     s.label = props.label;
     s.valueType = props.valueType;
     s.isRequired = props.isRequired ?? true;
-    s.enumOptions = props.enumOptions ?? null;
     s.validationRules = props.validationRules ?? null;
     s.sortOrder = props.sortOrder ?? 0;
     return s;

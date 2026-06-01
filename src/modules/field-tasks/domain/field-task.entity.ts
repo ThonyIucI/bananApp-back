@@ -19,11 +19,11 @@ const FieldTaskSchema = defineEntity({
     performedByUser: () => p.manyToOne(User).deleteRule('cascade'),
     areaCoveredHa: p.decimal('number').precision(8).scale(4).nullable(),
     cost: p.decimal('number').precision(10).scale(2).nullable(),
+    laborDays: p.decimal('number').precision(8).scale(2).nullable(),
     notes: p.text().nullable(),
     localUuid: p.string().length(36).unique().nullable(),
     syncedAt: p.datetime().nullable(),
-    details: () =>
-      p.oneToMany(FieldTaskDetail).mappedBy((d) => d.fieldTask),
+    details: () => p.oneToMany(FieldTaskDetail).mappedBy((d) => d.fieldTask),
   },
 });
 
@@ -38,6 +38,7 @@ export class FieldTask extends FieldTaskSchema.class {
     subPlot?: SubPlot | null;
     areaCoveredHa?: number | null;
     cost?: number | null;
+    laborDays?: number | null;
     notes?: string | null;
     localUuid?: string | null;
   }): FieldTask {
@@ -49,6 +50,7 @@ export class FieldTask extends FieldTaskSchema.class {
     ft.subPlot = props.subPlot ?? null;
     ft.areaCoveredHa = props.areaCoveredHa ?? null;
     ft.cost = props.cost ?? null;
+    ft.laborDays = props.laborDays ?? null;
     ft.notes = props.notes?.trim() ?? null;
     ft.localUuid = props.localUuid ?? null;
     ft.syncedAt = null;
@@ -61,12 +63,15 @@ export class FieldTask extends FieldTaskSchema.class {
     performedAt?: Date;
     areaCoveredHa?: number | null;
     cost?: number | null;
+    laborDays?: number | null;
     notes?: string | null;
   }): void {
     if (props.subPlot !== undefined) this.subPlot = props.subPlot;
     if (props.performedAt !== undefined) this.performedAt = props.performedAt;
-    if (props.areaCoveredHa !== undefined) this.areaCoveredHa = props.areaCoveredHa;
+    if (props.areaCoveredHa !== undefined)
+      this.areaCoveredHa = props.areaCoveredHa;
     if (props.cost !== undefined) this.cost = props.cost;
+    if (props.laborDays !== undefined) this.laborDays = props.laborDays;
     if (props.notes !== undefined) this.notes = props.notes?.trim() ?? null;
     this.validate();
   }
@@ -78,10 +83,24 @@ export class FieldTask extends FieldTaskSchema.class {
         'performedAt',
       );
     }
-    if (this.areaCoveredHa !== undefined && this.areaCoveredHa !== null && this.areaCoveredHa <= 0) {
+    if (
+      this.areaCoveredHa !== undefined &&
+      this.areaCoveredHa !== null &&
+      this.areaCoveredHa <= 0
+    ) {
       throw new ValidationException(
         'El área cubierta debe ser mayor a 0',
         'areaCoveredHa',
+      );
+    }
+    if (
+      this.laborDays !== undefined &&
+      this.laborDays !== null &&
+      this.laborDays < 0
+    ) {
+      throw new ValidationException(
+        'Los jornales no pueden ser negativos',
+        'laborDays',
       );
     }
   }

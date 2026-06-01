@@ -57,14 +57,12 @@ export class FieldTasksController {
       subPlotId: dto.subPlotId,
       areaCoveredHa: dto.areaCoveredHa,
       cost: dto.cost,
+      laborDays: dto.laborDays,
       notes: dto.notes,
       localUuid: dto.localUuid,
       details: (dto.details ?? []).map((d) => ({
         detailKey: d.detailKey,
-        valueText: d.valueText,
-        valueNumeric: d.valueNumeric,
-        valueDate: d.valueDate ? new Date(d.valueDate) : null,
-        valueBoolean: d.valueBoolean,
+        value: d.value,
       })),
     });
   }
@@ -105,13 +103,11 @@ export class FieldTasksController {
       performedAt: dto.performedAt ? new Date(dto.performedAt) : undefined,
       areaCoveredHa: dto.areaCoveredHa,
       cost: dto.cost,
+      laborDays: dto.laborDays,
       notes: dto.notes,
       details: dto.details?.map((d) => ({
         detailKey: d.detailKey,
-        valueText: d.valueText,
-        valueNumeric: d.valueNumeric,
-        valueDate: d.valueDate ? new Date(d.valueDate) : null,
-        valueBoolean: d.valueBoolean,
+        value: d.value,
       })),
     });
   }
