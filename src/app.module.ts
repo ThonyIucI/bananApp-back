@@ -15,8 +15,11 @@ import { RibbonCalendarsModule } from './modules/ribbon-calendars/ribbon-calenda
 import { SectorsModule } from './modules/sectors/sectors.module';
 import { PlotsModule } from './modules/plots/plots.module';
 import { GaiaModule } from './modules/gaia/gaia.module';
+import { FieldTasksModule } from './modules/field-tasks/field-tasks.module';
+import { CropTypesModule } from './modules/crop-types/crop-types.module';
 import { MigrationRunnerService } from './database/migration-runner.service';
 import { SeedSuperadminService } from './database/seed-superadmin.service';
+import { SeedReferenceDataService } from './database/seed-reference-data.service';
 
 @Controller()
 class HealthController {
@@ -41,12 +44,15 @@ class HealthController {
     SectorsModule,
     PlotsModule,
     GaiaModule,
+    CropTypesModule,
+    FieldTasksModule,
   ],
   controllers: [HealthController],
   // TODO: mejorar la configuración de seeders con @mikro-orm/seeder
   providers: [
     MigrationRunnerService,
     SeedSuperadminService,
+    SeedReferenceDataService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })

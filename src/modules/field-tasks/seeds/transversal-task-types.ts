@@ -1,0 +1,433 @@
+import { EDetailValueType } from '../domain/task-type-detail-schema.entity';
+import { TSeedTaskType } from './seed-types';
+
+/** Transversal task types that apply to all crop types (`cropTypeKeys: ['*']`). */
+export const TRANSVERSAL_TASK_TYPES: TSeedTaskType[] = [
+  {
+    key: 'irrigation',
+    label: 'Riego',
+    cropTypeKeys: ['*'],
+    details: [
+      {
+        detailKey: 'water_source',
+        label: 'Fuente de agua',
+        valueType: EDetailValueType.ENUM,
+        isRequired: true,
+        options: [
+          { key: 'well', label: 'Pozo', sortOrder: 1 },
+          { key: 'canal', label: 'Canal', sortOrder: 2 },
+        ],
+        sortOrder: 1,
+      },
+      {
+        detailKey: 'start_time',
+        label: 'Hora de inicio',
+        valueType: EDetailValueType.TEXT,
+        isRequired: true,
+        validationRules: { widget: 'time', format: 'HH:MM' },
+        sortOrder: 2,
+      },
+      {
+        detailKey: 'end_time',
+        label: 'Hora de fin',
+        valueType: EDetailValueType.TEXT,
+        isRequired: true,
+        validationRules: { widget: 'time', format: 'HH:MM' },
+        sortOrder: 3,
+      },
+      {
+        detailKey: 'water_volume',
+        label: 'Volumen de agua (m³)',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: false,
+        sortOrder: 4,
+      },
+      {
+        detailKey: 'contracted_volume',
+        label: 'Volumen contratado (m³)',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: false,
+        sortOrder: 5,
+      },
+    ],
+  },
+
+  {
+    key: 'pest_control',
+    label: 'Aplicación de fitosanitarios',
+    cropTypeKeys: ['*'],
+    details: [
+      {
+        detailKey: 'justification',
+        label: 'Justificación (plaga/enfermedad)',
+        valueType: EDetailValueType.TEXT,
+        isRequired: true,
+        sortOrder: 1,
+      },
+      {
+        detailKey: 'input_ref',
+        label: 'Insumo',
+        valueType: EDetailValueType.TEXT,
+        isRequired: true,
+        validationRules: { widget: 'input_select' },
+        sortOrder: 2,
+      },
+      {
+        detailKey: 'dose',
+        label: 'Dosis',
+        valueType: EDetailValueType.TEXT,
+        isRequired: true,
+        sortOrder: 3,
+      },
+      {
+        detailKey: 'quantity_used',
+        label: 'Cantidad utilizada',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: false,
+        sortOrder: 4,
+      },
+      {
+        detailKey: 'equipment',
+        label: 'Equipo utilizado',
+        valueType: EDetailValueType.TEXT,
+        isRequired: false,
+        sortOrder: 5,
+      },
+      {
+        detailKey: 'safety_period',
+        label: 'Plazo de seguridad (días)',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: false,
+        sortOrder: 6,
+      },
+      {
+        detailKey: 'recommended_by',
+        label: 'Recomendado por',
+        valueType: EDetailValueType.TEXT,
+        isRequired: false,
+        sortOrder: 7,
+      },
+      {
+        detailKey: 'weather_condition',
+        label: 'Condición del clima',
+        valueType: EDetailValueType.ENUM,
+        isRequired: false,
+        options: [
+          { key: 'cloudy', label: 'Nublado', sortOrder: 1 },
+          { key: 'sunny', label: 'Soleado', sortOrder: 2 },
+          { key: 'rainy', label: 'Lluvioso', sortOrder: 3 },
+        ],
+        sortOrder: 8,
+      },
+    ],
+  },
+
+  {
+    key: 'pest_control_biological',
+    label: 'Control biológico de plagas',
+    cropTypeKeys: ['*'],
+    details: [
+      {
+        detailKey: 'pest_target',
+        label: 'Plaga objetivo',
+        valueType: EDetailValueType.TEXT,
+        isRequired: true,
+        sortOrder: 1,
+      },
+      {
+        detailKey: 'biological_agent',
+        label: 'Agente biológico',
+        valueType: EDetailValueType.TEXT,
+        isRequired: true,
+        sortOrder: 2,
+      },
+      {
+        detailKey: 'dose',
+        label: 'Dosis',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: false,
+        sortOrder: 3,
+      },
+      {
+        detailKey: 'unit',
+        label: 'Unidad',
+        valueType: EDetailValueType.TEXT,
+        isRequired: false,
+        sortOrder: 4,
+      },
+    ],
+  },
+
+  {
+    key: 'fertilization_soil',
+    label: 'Abonamiento al suelo',
+    cropTypeKeys: ['*'],
+    details: [
+      {
+        detailKey: 'input_ref',
+        label: 'Fertilizante / abono',
+        valueType: EDetailValueType.TEXT,
+        isRequired: true,
+        validationRules: { widget: 'input_select' },
+        sortOrder: 1,
+      },
+      {
+        detailKey: 'formulation',
+        label: 'Formulación (N-P-K)',
+        valueType: EDetailValueType.TEXT,
+        isRequired: false,
+        sortOrder: 2,
+      },
+      {
+        detailKey: 'quantity_sacks',
+        label: 'Cantidad (sacos)',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: false,
+        sortOrder: 3,
+      },
+      {
+        detailKey: 'quantity_kg',
+        label: 'Kilos',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: false,
+        sortOrder: 4,
+      },
+      {
+        detailKey: 'application_method',
+        label: 'Método de aplicación',
+        valueType: EDetailValueType.ENUM,
+        isRequired: false,
+        options: [
+          { key: 'broadcast', label: 'Al voleo', sortOrder: 1 },
+          { key: 'localized', label: 'Localizado', sortOrder: 2 },
+          { key: 'fertigation', label: 'Fertirriego', sortOrder: 3 },
+        ],
+        sortOrder: 5,
+      },
+    ],
+  },
+
+  {
+    key: 'fertilization_foliar',
+    label: 'Aplicación foliar',
+    cropTypeKeys: ['*'],
+    details: [
+      {
+        detailKey: 'start_time',
+        label: 'Hora inicio',
+        valueType: EDetailValueType.TEXT,
+        isRequired: true,
+        validationRules: { widget: 'time', format: 'HH:MM' },
+        sortOrder: 1,
+      },
+      {
+        detailKey: 'end_time',
+        label: 'Hora fin',
+        valueType: EDetailValueType.TEXT,
+        isRequired: true,
+        validationRules: { widget: 'time', format: 'HH:MM' },
+        sortOrder: 2,
+      },
+      {
+        detailKey: 'input_ref',
+        label: 'Producto aplicado',
+        valueType: EDetailValueType.TEXT,
+        isRequired: true,
+        validationRules: { widget: 'input_select' },
+        sortOrder: 3,
+      },
+      {
+        detailKey: 'dose',
+        label: 'Dosis',
+        valueType: EDetailValueType.TEXT,
+        isRequired: false,
+        sortOrder: 4,
+      },
+      {
+        detailKey: 'mix_volume',
+        label: 'Volumen de mezcla (L)',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: false,
+        sortOrder: 5,
+      },
+      {
+        detailKey: 'equipment',
+        label: 'Equipo de aplicación',
+        valueType: EDetailValueType.TEXT,
+        isRequired: false,
+        sortOrder: 6,
+      },
+    ],
+  },
+
+  {
+    key: 'harvest',
+    label: 'Cosecha',
+    cropTypeKeys: ['*'],
+    details: [
+      {
+        detailKey: 'quantity_value',
+        label: 'Cantidad cosechada',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: true,
+        sortOrder: 1,
+      },
+      {
+        detailKey: 'quantity_unit',
+        label: 'Unidad',
+        valueType: EDetailValueType.ENUM,
+        isRequired: true,
+        options: [
+          { key: 'sacks', label: 'Sacos', sortOrder: 1 },
+          { key: 'boxes', label: 'Cajas', sortOrder: 2 },
+          { key: 'crates', label: 'Jabas', sortOrder: 3 },
+          { key: 'kg', label: 'Kilogramos', sortOrder: 4 },
+          { key: 'bunches', label: 'Racimos', sortOrder: 5 },
+          { key: 'tons', label: 'Toneladas', sortOrder: 6 },
+          { key: 'other', label: 'Otro', sortOrder: 7 },
+        ],
+        sortOrder: 2,
+      },
+      {
+        detailKey: 'discarded_value',
+        label: 'Cantidad descartada',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: false,
+        sortOrder: 3,
+      },
+      {
+        detailKey: 'quality_grade',
+        label: 'Grado de calidad',
+        valueType: EDetailValueType.ENUM,
+        isRequired: false,
+        options: [
+          { key: 'A', label: 'Grado A', sortOrder: 1 },
+          { key: 'B', label: 'Grado B', sortOrder: 2 },
+          { key: 'C', label: 'Grado C', sortOrder: 3 },
+          { key: 'discard', label: 'Descarte', sortOrder: 4 },
+        ],
+        sortOrder: 4,
+      },
+    ],
+  },
+
+  {
+    key: 'sap_analysis',
+    label: 'Análisis de savia',
+    cropTypeKeys: ['*'],
+    details: [
+      {
+        detailKey: 'brix',
+        label: '°Brix',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: false,
+        sortOrder: 1,
+      },
+      {
+        detailKey: 'temperature',
+        label: 'Temperatura (°C)',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: false,
+        sortOrder: 2,
+      },
+      {
+        detailKey: 'ph',
+        label: 'pH',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: false,
+        sortOrder: 3,
+      },
+    ],
+  },
+
+  {
+    key: 'weeding',
+    label: 'Deshierbo',
+    cropTypeKeys: ['*'],
+    details: [
+      {
+        detailKey: 'method',
+        label: 'Método',
+        valueType: EDetailValueType.ENUM,
+        isRequired: true,
+        options: [
+          { key: 'manual', label: 'Manual', sortOrder: 1 },
+          { key: 'mechanical', label: 'Mecánico', sortOrder: 2 },
+          { key: 'mulch', label: 'Mulch', sortOrder: 3 },
+        ],
+        sortOrder: 1,
+      },
+      {
+        detailKey: 'area_ha',
+        label: 'Área trabajada (ha)',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: false,
+        sortOrder: 2,
+      },
+    ],
+  },
+
+  {
+    key: 'pruning',
+    label: 'Poda',
+    cropTypeKeys: ['*'],
+    details: [
+      {
+        detailKey: 'pruning_type',
+        label: 'Tipo de poda',
+        valueType: EDetailValueType.ENUM,
+        isRequired: true,
+        options: [
+          { key: 'formation', label: 'Formación', sortOrder: 1 },
+          { key: 'sanitation', label: 'Sanitaria', sortOrder: 2 },
+          { key: 'thinning', label: 'Aclareo', sortOrder: 3 },
+        ],
+        sortOrder: 1,
+      },
+      {
+        detailKey: 'area_pruned_ha',
+        label: 'Área podada (ha)',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: false,
+        sortOrder: 2,
+      },
+    ],
+  },
+
+  {
+    key: 'measurement',
+    label: 'Medición',
+    cropTypeKeys: ['*'],
+    details: [
+      {
+        detailKey: 'measurement_type',
+        label: 'Tipo de medición',
+        valueType: EDetailValueType.ENUM,
+        isRequired: true,
+        options: [
+          { key: 'brix', label: '°Brix', sortOrder: 1 },
+          { key: 'ph', label: 'pH', sortOrder: 2 },
+          { key: 'moisture', label: 'Humedad', sortOrder: 3 },
+          { key: 'temperature', label: 'Temperatura', sortOrder: 4 },
+          { key: 'ec', label: 'Conductividad eléctrica', sortOrder: 5 },
+          { key: 'other', label: 'Otro', sortOrder: 6 },
+        ],
+        sortOrder: 1,
+      },
+      {
+        detailKey: 'value',
+        label: 'Valor',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: true,
+        sortOrder: 2,
+      },
+      {
+        detailKey: 'unit',
+        label: 'Unidad',
+        valueType: EDetailValueType.TEXT,
+        isRequired: false,
+        sortOrder: 3,
+      },
+    ],
+  },
+];

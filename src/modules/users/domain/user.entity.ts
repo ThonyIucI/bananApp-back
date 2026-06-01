@@ -2,7 +2,6 @@ import { defineEntity, p } from '@mikro-orm/core';
 import * as bcrypt from 'bcrypt';
 import { BaseSchema } from '../../shared/base.entity';
 import { ValidationException } from '../../shared/exceptions/domain.exception';
-import { Role } from '../../roles/domain/role.entity';
 
 export enum EGaiaPlan {
   FREE = 'free',
@@ -35,7 +34,6 @@ const UserSchema = defineEntity({
     googleId: p.string().length(100).nullable(),
     avatarUrl: p.string().length(500).nullable(),
     subscriptionTier: p.enum(Object.values(EGaiaPlan)).default(EGaiaPlan.FREE),
-    userRoles: () => p.manyToMany(Role).fixedOrder().pivotTable('user_roles'),
   },
 });
 

@@ -10,4 +10,8 @@ select * from registration_challenges;
 select * from roles where key ='independent_farmer';
 select * from role_permission where role_id='019e111b-ff91-7ddf-a05e-148c385a7568';
 select * from user_plot;
-select * from gaia_usages;
+update users
+set subscription_tier='promax'
+where id='019e111b-ffe3-7c29-b6e8-e609c9829566';
+
+select * from gaia_queries;

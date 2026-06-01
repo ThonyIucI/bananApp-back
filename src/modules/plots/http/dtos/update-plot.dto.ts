@@ -49,6 +49,10 @@ export class UpdatePlotDto {
   workerUserId?: string | null;
 
   @IsOptional()
+  @IsUUID()
+  cropTypeId?: string | null;
+
+  @IsOptional()
   @IsNumber({ maxDecimalPlaces: 4 })
   @Min(0.0001)
   @Max(9999.9999)

@@ -58,6 +58,12 @@ const PERMISSION_DESCRIPTIONS: Record<PermissionKey, string> = {
 
   harvest_read: 'Ver cosechas',
   harvest_manage: 'Gestionar cosechas',
+
+  field_task_list: 'Ver labores de campo',
+  field_task_create: 'Registrar labor de campo',
+  field_task_update: 'Modificar labor de campo',
+  field_task_delete: 'Eliminar labor de campo',
+  crop_type_list: 'Ver tipos de cultivo',
 };
 // TODO: Actualizar permisos del seeder
 // TODO: Acttualizar controllers con nuevo formato de permisos
@@ -139,6 +145,11 @@ const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'sanction_manage',
     'harvest_read',
     'harvest_manage',
+    'field_task_list',
+    'field_task_create',
+    'field_task_update',
+    'field_task_delete',
+    'crop_type_list',
   ],
   harvest_chief: [
     'plot_read',
@@ -146,6 +157,8 @@ const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'bundling_read',
     'harvest_read',
     'harvest_manage',
+    'field_task_list',
+    'crop_type_list',
   ],
   calibrator: [
     'bundling_read',
@@ -153,6 +166,8 @@ const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'bundling_update',
     'plot_read',
     'sector_read',
+    'field_task_list',
+    'crop_type_list',
   ],
   bagger: [
     'user_read',
@@ -163,6 +178,9 @@ const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'bundling_update',
     'ribbon_calendar_read',
     'harvest_read',
+    'field_task_list',
+    'field_task_create',
+    'crop_type_list',
   ],
   member: [
     'user_read',
@@ -177,8 +195,22 @@ const ROLE_PERMISSIONS: Record<RoleKey, PermissionKey[]> = {
     'sanction_read',
     'harvest_read',
     'harvest_manage',
+    'field_task_list',
+    'field_task_create',
+    'field_task_update',
+    'field_task_delete',
+    'crop_type_list',
   ],
-  independent_farmer: ['plot_read', 'plot_manage', 'sector_read'],
+  independent_farmer: [
+    'plot_read',
+    'plot_manage',
+    'sector_read',
+    'field_task_list',
+    'field_task_create',
+    'field_task_update',
+    'field_task_delete',
+    'crop_type_list',
+  ],
 };
 
 @Injectable()

@@ -6,12 +6,14 @@ import { ISectorRepository } from '../../sectors/domain/sector.repository';
 import { IUserRepository } from '../../users/domain/user.repository';
 import { NotFoundException } from '../../shared/exceptions/domain.exception';
 import { User } from '../../users/domain/user.entity';
+import { CropType } from '../../crop-types/domain/crop-type.entity';
 
 export interface CreatePlotCommand {
   name: string;
   sectorId?: string;
   ownerUserId: string;
   workerUserId?: string;
+  cropTypeId?: string | null;
   areaHectares: number;
   cadastralCode?: string;
   latitude: number;
@@ -59,11 +61,21 @@ export class CreatePlotHandler {
           throw new NotFoundException('Usuario trabajador no encontrado');
       }
 
+      let cropType: CropType | null = null;
+      if (cmd.cropTypeId) {
+        cropType = await em.findOne(CropType, {
+          id: cmd.cropTypeId,
+          isActive: true,
+        });
+        if (!cropType) throw new NotFoundException('Cultivo no encontrado');
+      }
+
       const plot = Plot.make({
         name: cmd.name,
         sector: sector ?? undefined,
         ownerUser,
         workerUser,
+        cropType,
         areaHectares: cmd.areaHectares,
         cadastralCode: cmd.cadastralCode,
         latitude: cmd.latitude,

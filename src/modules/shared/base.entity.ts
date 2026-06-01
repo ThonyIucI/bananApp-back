@@ -4,12 +4,20 @@ import { uuidv7 } from 'uuidv7';
 // Returns fresh property builder instances for each entity.
 // Do NOT use a shared constant — MikroORM v7 mutates builders during schema
 // processing, so reusing the same instances across entities corrupts metadata.
-export function baseProperties() {
+export function baseProperties(props?: { withDeletedAt?: boolean }) {
+  if (props?.withDeletedAt) {
+    return {
+      id: entityIdV7(),
+      createdAt: p.datetime().onCreate(() => new Date()),
+      updatedAt: p
+        .datetime()
+        .onCreate(() => new Date())
+        .onUpdate(() => new Date()),
+      deletedAt: p.datetime().nullable(),
+    };
+  }
   return {
-    id: p
-      .uuid()
-      .primary()
-      .onCreate(() => uuidv7()),
+    id: entityIdV7(),
     createdAt: p.datetime().onCreate(() => new Date()),
     updatedAt: p
       .datetime()
@@ -38,5 +46,5 @@ export const BaseSchema = defineEntity({
 export const BaseSchemaWithDeletedAt = defineEntity({
   name: 'BaseEntity',
   abstract: true,
-  properties: baseProperties(),
+  properties: baseProperties({ withDeletedAt: true }),
 });
