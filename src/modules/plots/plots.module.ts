@@ -31,12 +31,14 @@ import {
 } from './http/sub-plots.controller';
 import { SectorsModule } from '../sectors/sectors.module';
 import { UsersModule } from '../users/users.module';
+import { CropTypesModule } from '../crop-types/crop-types.module';
 
 @Module({
   imports: [
     MikroOrmModule.forFeature([Plot, SubPlot, UserPlot]),
     SectorsModule,
     UsersModule,
+    CropTypesModule,
   ],
   providers: [
     { provide: IPlotRepository, useClass: MikroOrmPlotRepository },

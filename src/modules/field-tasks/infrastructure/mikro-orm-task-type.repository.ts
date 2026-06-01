@@ -3,6 +3,12 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { TaskType } from '../domain/task-type.entity';
 import { ITaskTypeRepository } from '../domain/task-type.repository';
 
+const DETAIL_POPULATE = [
+  'detailSchemas',
+  'detailSchemas.detailOptions',
+  'cropTypes',
+] as const;
+
 @Injectable()
 export class MikroOrmTaskTypeRepository extends ITaskTypeRepository {
   constructor(private readonly em: EntityManager) {
@@ -13,7 +19,7 @@ export class MikroOrmTaskTypeRepository extends ITaskTypeRepository {
     return this.em.findOne(
       TaskType,
       { key, isActive: true },
-      { populate: ['detailSchemas', 'cropTypes'] },
+      { populate: DETAIL_POPULATE },
     );
   }
 
@@ -21,7 +27,7 @@ export class MikroOrmTaskTypeRepository extends ITaskTypeRepository {
     return this.em.findOne(
       TaskType,
       { id, isActive: true },
-      { populate: ['detailSchemas', 'cropTypes'] },
+      { populate: DETAIL_POPULATE },
     );
   }
 
@@ -31,7 +37,7 @@ export class MikroOrmTaskTypeRepository extends ITaskTypeRepository {
       where['cropTypes'] = { key: cropTypeKey };
     }
     return this.em.find(TaskType, where, {
-      populate: ['detailSchemas', 'cropTypes'],
+      populate: DETAIL_POPULATE,
       orderBy: { key: 'ASC' },
     });
   }
