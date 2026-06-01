@@ -11,6 +11,7 @@ import {
 } from '../../shared/exceptions/domain.exception';
 import { User } from '../../users/domain/user.entity';
 import { Sector } from '../../sectors/domain/sector.entity';
+import { CropType } from '../../crop-types/domain/crop-type.entity';
 
 export interface UpdatePlotCommand {
   id: string;
@@ -18,6 +19,7 @@ export interface UpdatePlotCommand {
   sectorId?: string;
   ownerUserId?: string;
   workerUserId?: string | null;
+  cropTypeId?: string | null;
   areaHectares?: number;
   cadastralCode?: string | null;
   latitude?: number;
@@ -69,12 +71,22 @@ export class UpdatePlotHandler {
           throw new NotFoundException('Usuario arrendatario no encontrado');
       }
 
+      let cropType: CropType | null | undefined = undefined;
+      if (cmd.cropTypeId !== undefined) {
+        cropType = cmd.cropTypeId
+          ? await em.findOne(CropType, { id: cmd.cropTypeId, isActive: true })
+          : null;
+        if (cmd.cropTypeId && !cropType)
+          throw new NotFoundException('Cultivo no encontrado');
+      }
+
       // 3. Actualizar Plot
       plot.set({
         name: cmd.name,
         sector,
         ownerUser,
         workerUser,
+        cropType,
         areaHectares: cmd.areaHectares,
         cadastralCode: cmd.cadastralCode,
         latitude: cmd.latitude,

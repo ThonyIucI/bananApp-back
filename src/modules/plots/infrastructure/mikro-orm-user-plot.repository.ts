@@ -11,7 +11,10 @@ export class MikroOrmUserPlotRepository extends IUserPlotRepository {
     super();
   }
 
-  findActiveByUser(userId: string, cooperativeId?: string): Promise<UserPlot[]> {
+  findActiveByUser(
+    userId: string,
+    cooperativeId?: string,
+  ): Promise<UserPlot[]> {
     const where: Record<string, unknown> = {
       user: { id: userId },
       unassignedAt: null,

@@ -42,6 +42,10 @@ export class CreatePlotDto {
   @IsUUID()
   workerUserId?: string;
 
+  @IsOptional()
+  @IsUUID()
+  cropTypeId?: string | null;
+
   @IsNumber({ maxDecimalPlaces: 4 })
   @Min(0.0001, { message: 'El área debe ser mayor a 0' })
   @Max(9999.9999, { message: 'El área no puede exceder 9999.9999 hectáreas' })

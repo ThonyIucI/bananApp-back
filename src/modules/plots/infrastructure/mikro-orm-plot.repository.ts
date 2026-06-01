@@ -8,6 +8,7 @@ const PLOT_POPULATE = [
   'sector',
   'ownerUser',
   'workerUser',
+  'cropType',
   'subPlots',
 ] as const;
 
@@ -64,6 +65,10 @@ export class MikroOrmPlotRepository extends IPlotRepository {
         'ownerUser.id',
         'ownerUser.firstName',
         'ownerUser.lastName',
+        'cropType.id',
+        'cropType.key',
+        'cropType.label',
+        'cropType.lifecycleType',
         'subPlots.id',
       ] as const,
     });

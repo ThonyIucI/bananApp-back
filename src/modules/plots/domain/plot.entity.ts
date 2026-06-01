@@ -2,6 +2,7 @@ import { Collection, defineEntity, p } from '@mikro-orm/core';
 import { BaseSchema } from '../../shared/base.entity';
 import { Sector } from '../../sectors/domain/sector.entity';
 import { User } from '../../users/domain/user.entity';
+import { CropType } from '../../crop-types/domain/crop-type.entity';
 import { SubPlot } from './sub-plot.entity';
 import { ValidationException } from '../../shared/exceptions/domain.exception';
 
@@ -14,6 +15,7 @@ const PlotSchema = defineEntity({
     sector: () => p.manyToOne(Sector).nullable().deleteRule('set null'),
     ownerUser: () => p.manyToOne(User).deleteRule('cascade'),
     workerUser: () => p.manyToOne(User).nullable().deleteRule('set null'),
+    cropType: () => p.manyToOne(CropType).nullable().deleteRule('restrict'),
     areaHectares: p.decimal('number').precision(8).scale(4),
     cadastralCode: p.string().length(50).nullable(),
     latitude: p.decimal('number').precision(9).scale(6).nullable(),
@@ -31,6 +33,7 @@ export class Plot extends PlotSchema.class {
     sector?: Sector | null;
     ownerUser: User;
     workerUser?: User;
+    cropType?: CropType | null;
     areaHectares: number;
     cadastralCode?: string;
     latitude: number;
@@ -42,6 +45,7 @@ export class Plot extends PlotSchema.class {
     plot.sector = props.sector ?? null;
     plot.ownerUser = props.ownerUser;
     plot.workerUser = props.workerUser ?? null;
+    plot.cropType = props.cropType ?? null;
     plot.areaHectares = props.areaHectares;
     plot.cadastralCode = props.cadastralCode?.trim() ?? null;
     plot.latitude = props.latitude;
@@ -56,6 +60,7 @@ export class Plot extends PlotSchema.class {
     sector?: Sector;
     ownerUser?: User;
     workerUser?: User | null;
+    cropType?: CropType | null;
     areaHectares?: number;
     cadastralCode?: string | null;
     latitude?: number;
@@ -66,6 +71,7 @@ export class Plot extends PlotSchema.class {
     if (props.sector !== undefined) this.sector = props.sector;
     if (props.ownerUser !== undefined) this.ownerUser = props.ownerUser;
     if (props.workerUser !== undefined) this.workerUser = props.workerUser;
+    if (props.cropType !== undefined) this.cropType = props.cropType;
     if (props.areaHectares !== undefined)
       this.areaHectares = props.areaHectares;
     if (props.cadastralCode !== undefined)
