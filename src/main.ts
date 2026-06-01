@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { AppModule } from './app.module';
 import { ResponseFormatInterceptor } from './modules/shared/interceptors/response-format.interceptor';
 import { GlobalExceptionFilter } from './modules/shared/exceptions/global-exception.filter';
@@ -11,6 +12,7 @@ async function bootstrap() {
   const allowedOrigins = (
     process.env.CORS_ORIGINS ?? 'http://localhost:3000'
   ).split(',');
+  app.useWebSocketAdapter(new IoAdapter(app));
   app.enableCors({
     origin: allowedOrigins,
     credentials: true,

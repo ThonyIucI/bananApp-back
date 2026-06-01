@@ -15,3 +15,5 @@ set subscription_tier='promax'
 where id='019e111b-ffe3-7c29-b6e8-e609c9829566';
 
 select * from gaia_queries;
+select * from plots;
+select * from user_roles;
