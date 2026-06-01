@@ -24,6 +24,7 @@ import { GaiaQuery } from '../modules/gaia/domain/gaia-query.entity';
 import { CropType } from '../modules/crop-types/domain/crop-type.entity';
 import { TaskType } from '../modules/field-tasks/domain/task-type.entity';
 import { TaskTypeDetailSchema } from '../modules/field-tasks/domain/task-type-detail-schema.entity';
+import { TaskTypeDetailOption } from '../modules/field-tasks/domain/task-type-detail-option.entity';
 import { FieldTask } from '../modules/field-tasks/domain/field-task.entity';
 import { FieldTaskDetail } from '../modules/field-tasks/domain/field-task-detail.entity';
 
@@ -56,6 +57,7 @@ export default defineConfig({
     CropType,
     TaskType,
     TaskTypeDetailSchema,
+    TaskTypeDetailOption,
     FieldTask,
     FieldTaskDetail,
   ],

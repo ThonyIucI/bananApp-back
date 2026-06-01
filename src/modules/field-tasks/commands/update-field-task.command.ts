@@ -6,6 +6,7 @@ export interface TUpdateFieldTaskCommand {
   performedAt?: Date;
   areaCoveredHa?: number | null;
   cost?: number | null;
+  laborDays?: number | null;
   notes?: string | null;
   details?: TCreateFieldTaskDetailCommand[];
 }

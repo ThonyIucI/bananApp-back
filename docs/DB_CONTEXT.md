@@ -24,6 +24,14 @@
 - [sub_plots](#sub_plots)
 - [ribbon_calendars](#ribbon_calendars)
 - [bundlings](#bundlings)
+- [crop_types](#crop_types)
+- [task_types](#task_types)
+- [crop_type_task_type](#crop_type_task_type)
+- [task_type_detail_schemas](#task_type_detail_schemas)
+- [field_tasks](#field_tasks)
+- [field_task_details](#field_task_details)
+- [gaia_usages](#gaia_usages)
+- [gaia_queries](#gaia_queries)
 
 ---
 
@@ -196,6 +204,7 @@ Parcela agrícola perteneciente a un sector.
 | `sector_id`      | uuid           | NO       |         | FK → sectors.id CASCADE DELETE    |
 | `owner_user_id`  | uuid           | NO       |         | FK → users.id CASCADE DELETE      |
 | `worker_user_id` | uuid           | YES      | NULL    | FK → users.id SET NULL            |
+| `crop_type_id`   | uuid           | YES      | NULL    | FK → crop_types.id RESTRICT DELETE — cultivo principal de la parcela (opcional; permite registrar labores filtradas por crop) |
 | `area_hectares`  | numeric(8,4)   | NO       |         |                                   |
 | `cadastral_code` | varchar(50)    | YES      | NULL    |                                   |
 | `latitude`       | decimal(9,6)   | YES      | NULL    | Latitud GPS [-90, 90]             |
@@ -261,7 +270,129 @@ Registro de enfunde: cuántas fundas colocó un enfundador en una parcela.
 
 **UNIQUE:** `local_uuid` — garantiza idempotencia en sincronización offline.
 
+> Nota: a partir de MVP4, los enfundes se migran progresivamente a `field_tasks` (task_type=`bundling`). Esta tabla queda como legacy y será desactivada cuando finalice la migración (ver `planning/mvp4/tasks/field-tasks-eav/`).
+
 ---
+
+## `crop_types`
+
+Catálogo de cultivos soportados por la plataforma. Define el lifecycle agronómico que la UI usa para calendarios y validaciones.
+
+| Column           | Type         | Nullable | Default | Constraints  | Description                                                                            |
+|------------------|--------------|----------|---------|--------------|----------------------------------------------------------------------------------------|
+| `id`             | uuid         | NO       | uuidv7  | PK           |                                                                                        |
+| `key`            | varchar(100) | NO       |         | UNIQUE       | English identifier: `banana`, `cacao`, `coffee`, `oil_palm`, `mango`, `citrus`, `avocado`, `rice`, `maize`, `legumes`, `other` |
+| `label`          | varchar(200) | NO       |         |              | Etiqueta legible: `Banano`, `Cacao`, `Café`, …                                          |
+| `lifecycle_type` | text         | NO       |         | CHECK IN (…) | `continuous_perennial` \| `determinate_annual` \| `seasonal_perennial`                  |
+| `is_active`      | boolean      | NO       | true    |              |                                                                                        |
+| `created_at`     | timestamptz  | NO       | now()   |              |                                                                                        |
+| `updated_at`     | timestamptz  | NO       | now()   |              |                                                                                        |
+
+> Sin `deleted_at`: catálogo controlado; baja lógica vía `is_active = false`.
+
+---
+
+## `task_types`
+
+Catálogo de labores agrícolas soportadas (EAV). Cada `task_type` define qué detalles dinámicos espera vía `task_type_detail_schemas`.
+
+| Column        | Type         | Nullable | Default | Constraints | Description                                                                                                                  |
+|---------------|--------------|----------|---------|-------------|------------------------------------------------------------------------------------------------------------------------------|
+| `id`          | uuid         | NO       | uuidv7  | PK          |                                                                                                                              |
+| `key`         | varchar(100) | NO       |         | UNIQUE      | English identifier: `bundling`, `harvest`, `pruning`, `irrigation`, `fertilization_organic`, `pest_control_biological`, `measurement`, `planting`, `weeding`, `mulching`, `cover_crop_seeding`, `soil_analysis` |
+| `label`       | varchar(200) | NO       |         |             | Etiqueta legible: `Enfunde`, `Cosecha`, …                                                                                     |
+| `is_active`   | boolean      | NO       | true    |             |                                                                                                                              |
+| `created_at`  | timestamptz  | NO       | now()   |             |                                                                                                                              |
+| `updated_at`  | timestamptz  | NO       | now()   |             |                                                                                                                              |
+
+> Sin `deleted_at`: catálogo controlado; baja lógica vía `is_active = false`.
+
+---
+
+## `crop_type_task_type`
+
+Pivot N:M entre cultivos y labores aplicables — limita qué `task_types` aparecen en la UI según el cultivo de la parcela.
+
+> ⚠️ Tabla pivot pura — sin lifecycle de negocio (no tiene `id` propio ni timestamps). Nombre en singular + orden alfabético de modelos.
+
+| Column         | Type | Nullable | Constraints                              |
+|----------------|------|----------|------------------------------------------|
+| `task_type_id` | uuid | NO       | FK → task_types.id CASCADE DELETE        |
+| `crop_type_id` | uuid | NO       | FK → crop_types.id CASCADE DELETE        |
+
+**PK compuesta:** (task_type_id, crop_type_id)
+
+---
+
+## `task_type_detail_schemas`
+
+Define los campos dinámicos (EAV) que cada `task_type` requiere. Es lo que permite formar el formulario en runtime sin tablas hijas por cultivo.
+
+| Column             | Type         | Nullable | Default | Constraints                                       | Description                                              |
+|--------------------|--------------|----------|---------|---------------------------------------------------|----------------------------------------------------------|
+| `id`               | uuid         | NO       | uuidv7  | PK                                                |                                                          |
+| `task_type_id`     | uuid         | NO       |         | FK → task_types.id CASCADE DELETE                 |                                                          |
+| `detail_key`       | varchar(100) | NO       |         |                                                   | Clave única dentro del task_type: `ribbon_color`, `quantity`, `weight_kg`, … |
+| `label`            | varchar(200) | NO       |         |                                                   | Etiqueta visible en el form                              |
+| `value_type`       | text         | NO       |         | CHECK IN ('text','numeric','date','boolean','enum') | Determina en qué columna de `field_task_details` se guarda |
+| `is_required`      | boolean      | NO       | true    |                                                   |                                                          |
+| `enum_options`     | jsonb        | YES      | NULL    |                                                   | Solo cuando `value_type='enum'` — array de opciones      |
+| `validation_rules` | jsonb        | YES      | NULL    |                                                   | Reglas extra (min/max, regex, etc.)                      |
+| `sort_order`       | integer      | NO       | 0       |                                                   | Orden de renderizado en el formulario                    |
+| `created_at`       | timestamptz  | NO       | now()   |                                                   |                                                          |
+| `updated_at`       | timestamptz  | NO       | now()   |                                                   |                                                          |
+
+**UNIQUE:** (task_type_id, detail_key)
+**INDEX:** (task_type_id, detail_key)
+
+> Sin `deleted_at`: la baja de un esquema implica romper datos históricos — se controla por `task_types.is_active`.
+
+---
+
+## `field_tasks`
+
+Registro principal de cualquier labor de campo (riego, abono, poda, enfunde, cosecha, medición, …). Único modelo agnóstico al cultivo — los detalles específicos van en `field_task_details` (EAV).
+
+| Column                  | Type         | Nullable | Default | Constraints                              | Description                                                       |
+|-------------------------|--------------|----------|---------|------------------------------------------|-------------------------------------------------------------------|
+| `id`                    | uuid         | NO       | uuidv7  | PK                                       |                                                                   |
+| `plot_id`               | uuid         | NO       |         | FK → plots.id CASCADE DELETE             |                                                                   |
+| `sub_plot_id`           | uuid         | YES      | NULL    | FK → sub_plots.id SET NULL               | Opcional: labor en una sub-parcela específica                     |
+| `task_type_id`          | uuid         | NO       |         | FK → task_types.id RESTRICT DELETE       | No se puede borrar un task_type con field_tasks asociados         |
+| `performed_at`          | timestamptz  | NO       |         |                                          | Cuándo se ejecutó la labor (no puede ser futura)                  |
+| `performed_by_user_id`  | uuid         | NO       |         | FK → users.id CASCADE DELETE             | Operario que realizó la labor                                     |
+| `area_covered_ha`       | numeric(8,4) | YES      | NULL    |                                          | Área cubierta. Opcional; debe ser > 0 si se provee                |
+| `cost`                  | numeric(10,2)| YES      | NULL    |                                          | Costo en moneda local                                             |
+| `notes`                 | text         | YES      | NULL    |                                          |                                                                   |
+| `local_uuid`            | varchar(36)  | YES      | NULL    | UNIQUE                                   | Generado en cliente para idempotencia offline                     |
+| `synced_at`             | timestamptz  | YES      | NULL    |                                          | Null = aún no sincronizado desde cliente                          |
+| `created_at`            | timestamptz  | NO       | now()   |                                          |                                                                   |
+| `updated_at`            | timestamptz  | NO       | now()   |                                          |                                                                   |
+| `deleted_at`            | timestamptz  | YES      | NULL    |                                          | Soft delete                                                       |
+
+**UNIQUE:** `local_uuid` — idempotencia para sincronización offline.
+
+---
+
+## `field_task_details`
+
+Detalles dinámicos por `field_task` (EAV). Cada fila representa un par `(detail_key, value)` donde solo una de las columnas `value_*` está llena según el `value_type` del schema.
+
+| Column           | Type          | Nullable | Default | Constraints                              | Description                                       |
+|------------------|---------------|----------|---------|------------------------------------------|---------------------------------------------------|
+| `id`             | uuid          | NO       | uuidv7  | PK                                       |                                                   |
+| `field_task_id`  | uuid          | NO       |         | FK → field_tasks.id CASCADE DELETE       |                                                   |
+| `detail_key`     | varchar(100)  | NO       |         |                                          | Coincide con `task_type_detail_schemas.detail_key` |
+| `value_text`     | text          | YES      | NULL    |                                          | Si `value_type='text'` o `'enum'`                  |
+| `value_numeric`  | numeric(15,6) | YES      | NULL    |                                          | Si `value_type='numeric'`                          |
+| `value_date`     | timestamptz   | YES      | NULL    |                                          | Si `value_type='date'`                             |
+| `value_boolean`  | boolean       | YES      | NULL    |                                          | Si `value_type='boolean'`                          |
+| `created_at`     | timestamptz   | NO       | now()   |                                          |                                                   |
+
+**UNIQUE:** (field_task_id, detail_key) — un detalle por clave por labor.
+**INDEX:** (field_task_id, detail_key)
+
+> Sin `updated_at` ni `deleted_at`: los detalles son inmutables; una edición de la labor reemplaza la fila completa por `(field_task_id, detail_key)`.
 
 ---
 

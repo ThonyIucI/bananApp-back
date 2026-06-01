@@ -23,23 +23,23 @@ const CROP_TYPES_SEED: Array<{
     lifecycleType: ELifecycleType.CONTINUOUS_PERENNIAL,
   },
   {
-    key: 'oil_palm',
-    label: 'Palma aceitera',
-    lifecycleType: ELifecycleType.CONTINUOUS_PERENNIAL,
-  },
-  {
     key: 'mango',
     label: 'Mango',
     lifecycleType: ELifecycleType.SEASONAL_PERENNIAL,
   },
   {
-    key: 'citrus',
-    label: 'Cítricos',
+    key: 'lemon',
+    label: 'Limón',
     lifecycleType: ELifecycleType.SEASONAL_PERENNIAL,
   },
   {
-    key: 'avocado',
-    label: 'Palta',
+    key: 'grape',
+    label: 'Uva',
+    lifecycleType: ELifecycleType.SEASONAL_PERENNIAL,
+  },
+  {
+    key: 'passion_fruit',
+    label: 'Maracuyá',
     lifecycleType: ELifecycleType.SEASONAL_PERENNIAL,
   },
   {
@@ -53,13 +53,13 @@ const CROP_TYPES_SEED: Array<{
     lifecycleType: ELifecycleType.DETERMINATE_ANNUAL,
   },
   {
-    key: 'legumes',
-    label: 'Legumbres',
+    key: 'chili',
+    label: 'Ají',
     lifecycleType: ELifecycleType.DETERMINATE_ANNUAL,
   },
   {
-    key: 'other',
-    label: 'Otros',
+    key: 'onion',
+    label: 'Cebolla',
     lifecycleType: ELifecycleType.DETERMINATE_ANNUAL,
   },
 ];
@@ -82,5 +82,25 @@ export class SeedCropTypesService {
       this.logger.log(`Seeded crop type: ${seed.key}`);
     }
     await em.flush();
+
+    await this.backfillPlotsToBanana();
+  }
+
+  /**
+   * Asigna `banana` como cultivo por defecto a las parcelas legacy que aún no
+   * tienen cultivo. Idempotente: no afecta a parcelas que ya tienen `crop_type_id`.
+   */
+  private async backfillPlotsToBanana(): Promise<void> {
+    const em = this.em.fork();
+    const banana = await em.findOne(CropType, { key: 'banana' });
+    if (!banana) return;
+
+    await em
+      .getConnection()
+      .execute(
+        `UPDATE "plots" SET "crop_type_id" = ? WHERE "crop_type_id" IS NULL AND "deleted_at" IS NULL`,
+        [banana.id],
+      );
+    this.logger.log('Backfill ejecutado: plots sin crop_type ahora son banano');
   }
 }

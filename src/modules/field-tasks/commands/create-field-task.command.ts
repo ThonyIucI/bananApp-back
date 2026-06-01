@@ -1,9 +1,7 @@
 export interface TCreateFieldTaskDetailCommand {
   detailKey: string;
-  valueText?: string | null;
-  valueNumeric?: number | null;
-  valueDate?: Date | null;
-  valueBoolean?: boolean | null;
+  /** Raw JS value — the handler encodes it via encodeDetailValue before persisting. */
+  value: string | number | boolean | null;
 }
 
 export interface TCreateFieldTaskCommand {
@@ -14,6 +12,7 @@ export interface TCreateFieldTaskCommand {
   subPlotId?: string | null;
   areaCoveredHa?: number | null;
   cost?: number | null;
+  laborDays?: number | null;
   notes?: string | null;
   localUuid?: string | null;
   details: TCreateFieldTaskDetailCommand[];

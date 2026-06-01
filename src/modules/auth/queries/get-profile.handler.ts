@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { User, EGaiaPlan } from '../../users/domain/user.entity';
+import { UserRole } from '../../roles/domain/user-role.entity';
 import { UserCooperative } from '../../cooperatives/domain/user-cooperative.entity';
 import { UserCooperativeRole } from '../../cooperatives/domain/user-cooperative-role.entity';
 import { NotFoundException } from '../../shared/exceptions/domain.exception';
@@ -34,12 +35,14 @@ export class GetProfileHandler {
   constructor(private readonly em: EntityManager) {}
 
   async execute(userId: string): Promise<ProfileResult> {
-    const user = await this.em.findOne(
-      User,
-      { id: userId },
-      { populate: ['userRoles'] },
-    );
+    const user = await this.em.findOne(User, { id: userId });
     if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    const userRoleEntries = await this.em.find(
+      UserRole,
+      { user: { id: userId } },
+      { populate: ['role'] },
+    );
 
     const memberships = await this.em.find(
       UserCooperative,
@@ -88,7 +91,9 @@ export class GetProfileHandler {
       mustChangePassword: user.mustChangePassword ?? false,
       createdAt: user.createdAt as Date,
       cooperatives,
-      userRoles: user?.userRoles?.map((r) => r.key),
+      userRoles: userRoleEntries.map(
+        (ur) => (ur.role as unknown as { key: string }).key,
+      ),
       subscriptionTier: user.subscriptionTier ?? EGaiaPlan.FREE,
       pictureUrl: user.avatarUrl ?? null,
     };

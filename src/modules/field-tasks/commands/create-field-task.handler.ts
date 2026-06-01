@@ -1,32 +1,38 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { IFieldTaskRepository } from '../domain/field-task.repository';
 import { ITaskTypeRepository } from '../domain/task-type.repository';
 import { IPlotRepository } from '../../plots/domain/plot.repository';
 import { ISubPlotRepository } from '../../plots/domain/sub-plot.repository';
 import { IUserRepository } from '../../users/domain/user.repository';
 import { FieldTask } from '../domain/field-task.entity';
 import { FieldTaskDetail } from '../domain/field-task-detail.entity';
-import { TaskTypeDetailSchema, EDetailValueType } from '../domain/task-type-detail-schema.entity';
+import {
+  TaskTypeDetailSchema,
+  EDetailValueType,
+} from '../domain/task-type-detail-schema.entity';
+import {
+  encodeDetailValue,
+  TDetailValue,
+} from '../domain/field-task-detail-value.util';
 import {
   NotFoundException,
   ValidationException,
 } from '../../shared/exceptions/domain.exception';
 import { TCreateFieldTaskCommand } from './create-field-task.command';
 import { SubPlot } from '../../plots/domain/sub-plot.entity';
+import { mapFieldTask, type FieldTaskDto } from '../domain/field-task.mapper';
 
 @Injectable()
 export class CreateFieldTaskHandler {
   constructor(
     private readonly em: EntityManager,
-    private readonly fieldTaskRepo: IFieldTaskRepository,
     private readonly taskTypeRepo: ITaskTypeRepository,
     private readonly plotRepo: IPlotRepository,
     private readonly subPlotRepo: ISubPlotRepository,
     private readonly userRepo: IUserRepository,
   ) {}
 
-  async execute(cmd: TCreateFieldTaskCommand): Promise<FieldTask> {
+  async execute(cmd: TCreateFieldTaskCommand): Promise<FieldTaskDto> {
     const [plot, taskType, performedByUser] = await Promise.all([
       this.plotRepo.findById(cmd.plotId),
       this.taskTypeRepo.findByKey(cmd.taskTypeKey),
@@ -34,12 +40,16 @@ export class CreateFieldTaskHandler {
     ]);
 
     if (!plot) throw new NotFoundException('Parcela no encontrada');
-    if (!taskType) throw new NotFoundException(`Tipo de labor "${cmd.taskTypeKey}" no encontrado`);
-    if (!performedByUser) throw new NotFoundException('Usuario ejecutor no encontrado');
+    if (!taskType)
+      throw new NotFoundException(
+        `Tipo de labor "${cmd.taskTypeKey}" no encontrado`,
+      );
+    if (!performedByUser)
+      throw new NotFoundException('Usuario ejecutor no encontrado');
 
     let subPlot: SubPlot | undefined;
     if (cmd.subPlotId) {
-      subPlot = await this.subPlotRepo.findById(cmd.subPlotId) ?? undefined;
+      subPlot = (await this.subPlotRepo.findById(cmd.subPlotId)) ?? undefined;
       if (!subPlot) throw new NotFoundException('Subparcela no encontrada');
       const subPlotPlotId = (subPlot.plot as unknown as { id: string }).id;
       if (subPlotPlotId !== cmd.plotId) {
@@ -50,83 +60,123 @@ export class CreateFieldTaskHandler {
       }
     }
 
-    this.validateDetails(cmd.details ?? [], taskType.detailSchemas.getItems());
+    await this.em.populate(taskType, ['detailSchemas.detailOptions']);
+    const schemas = taskType.detailSchemas.getItems();
 
-    return this.em.transactional(async (txEm) => {
-      const fieldTask = FieldTask.make({
+    const encodedDetails = this.validateAndEncodeDetails(
+      cmd.details ?? [],
+      schemas,
+    );
+
+    // Default areaCoveredHa to the plot's area when not specified
+    const areaCoveredHa =
+      cmd.areaCoveredHa ?? (plot.areaHectares as unknown as number) ?? null;
+
+    const fieldTask = await this.em.transactional((txEm) => {
+      const ft = FieldTask.make({
         plot,
         taskType,
         performedAt: cmd.performedAt,
         performedByUser,
         subPlot,
-        areaCoveredHa: cmd.areaCoveredHa,
+        areaCoveredHa,
         cost: cmd.cost,
+        laborDays: cmd.laborDays,
         notes: cmd.notes,
         localUuid: cmd.localUuid,
       });
-      txEm.persist(fieldTask);
+      txEm.persist(ft);
 
-      for (const detailCmd of cmd.details ?? []) {
+      for (const { detailKey, encodedValue } of encodedDetails) {
         const detail = FieldTaskDetail.make({
-          fieldTask,
-          detailKey: detailCmd.detailKey,
-          valueText: detailCmd.valueText,
-          valueNumeric: detailCmd.valueNumeric,
-          valueDate: detailCmd.valueDate,
-          valueBoolean: detailCmd.valueBoolean,
+          fieldTask: ft,
+          detailKey,
+          value: encodedValue,
         });
         txEm.persist(detail);
       }
 
-      return fieldTask;
+      return ft;
     });
+
+    // Reload with all relations needed for the mapper (details + taskType schemas + options)
+    await this.em.populate(fieldTask, [
+      'details',
+      'taskType.detailSchemas.detailOptions',
+      'plot',
+      'subPlot',
+      'performedByUser',
+    ]);
+
+    return mapFieldTask(fieldTask);
   }
 
-  private validateDetails(
+  private validateAndEncodeDetails(
     providedDetails: TCreateFieldTaskCommand['details'],
     schemas: TaskTypeDetailSchema[],
-  ): void {
+  ): Array<{ detailKey: string; encodedValue: string | null }> {
     const providedMap = new Map(providedDetails.map((d) => [d.detailKey, d]));
 
     for (const schema of schemas) {
       if (!schema.isRequired) continue;
       const provided = providedMap.get(schema.detailKey);
-      if (!provided) {
+      if (
+        provided === undefined ||
+        provided.value === null ||
+        provided.value === undefined
+      ) {
         throw new ValidationException(
           `El detalle "${schema.label}" es obligatorio para este tipo de labor`,
           schema.detailKey,
         );
       }
-      this.validateDetailValue(provided, schema);
     }
 
-    for (const detail of providedDetails) {
-      const schema = schemas.find((s) => s.detailKey === detail.detailKey);
+    const schemaMap = new Map(schemas.map((s) => [s.detailKey, s]));
+
+    return providedDetails.map((detail) => {
+      const schema = schemaMap.get(detail.detailKey);
       if (!schema) {
         throw new ValidationException(
           `El detalle "${detail.detailKey}" no está definido para este tipo de labor`,
           detail.detailKey,
         );
       }
-      this.validateDetailValue(detail, schema);
-    }
+
+      if (detail.value !== null && detail.value !== undefined) {
+        this.validateDetailValue(detail.value, schema);
+      }
+
+      return {
+        detailKey: detail.detailKey,
+        encodedValue: encodeDetailValue(
+          schema.valueType,
+          detail.value as TDetailValue,
+        ),
+      };
+    });
   }
 
   private validateDetailValue(
-    detail: TCreateFieldTaskCommand['details'][number],
+    raw: string | number | boolean,
     schema: TaskTypeDetailSchema,
   ): void {
-    if (schema.valueType === EDetailValueType.NUMERIC && detail.valueNumeric === undefined) {
+    if (schema.valueType === EDetailValueType.NUMERIC && isNaN(Number(raw))) {
       throw new ValidationException(
         `El detalle "${schema.label}" debe ser numérico`,
         schema.detailKey,
       );
     }
+
     if (schema.valueType === EDetailValueType.ENUM) {
-      const options = schema.enumOptions as string[] | null;
-      if (options && detail.valueText && !options.includes(detail.valueText)) {
+      const activeKeys = schema.detailOptions
+        .getItems()
+        .filter((o) => o.isActive)
+        .map((o) => o.key);
+
+      if (activeKeys.length > 0 && !activeKeys.includes(String(raw))) {
         throw new ValidationException(
-          `"${detail.valueText}" no es una opción válida para "${schema.label}"`,
+          `"${raw}" no es una opción válida para "${schema.label}"`,
           schema.detailKey,
         );
       }

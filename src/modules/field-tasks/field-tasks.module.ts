@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
 import { TaskType } from './domain/task-type.entity';
 import { TaskTypeDetailSchema } from './domain/task-type-detail-schema.entity';
+import { TaskTypeDetailOption } from './domain/task-type-detail-option.entity';
 import { FieldTask } from './domain/field-task.entity';
 import { FieldTaskDetail } from './domain/field-task-detail.entity';
 import { IFieldTaskRepository } from './domain/field-task.repository';
@@ -22,7 +23,13 @@ import { CropTypesModule } from '../crop-types/crop-types.module';
 
 @Module({
   imports: [
-    MikroOrmModule.forFeature([TaskType, TaskTypeDetailSchema, FieldTask, FieldTaskDetail]),
+    MikroOrmModule.forFeature([
+      TaskType,
+      TaskTypeDetailSchema,
+      TaskTypeDetailOption,
+      FieldTask,
+      FieldTaskDetail,
+    ]),
     PlotsModule,
     UsersModule,
     CropTypesModule,
