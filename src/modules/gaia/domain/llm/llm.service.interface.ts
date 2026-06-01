@@ -1,6 +1,9 @@
 import { EGaiaQueryCategory } from '../gaia-query-category.enum';
 import type { FunctionDeclaration } from '@google/genai';
-import type { IGaiaToolContext, IPendingAction } from '../../tools/gaia-tool.types';
+import type {
+  IGaiaToolContext,
+  IPendingAction,
+} from '../../tools/gaia-tool.types';
 
 export interface IGaiaHistoryEntry {
   role: 'user' | 'assistant';
@@ -54,7 +57,11 @@ export interface ILLMService {
     history: IGaiaHistoryEntry[];
     userMessage: string;
     toolDeclarations: FunctionDeclaration[];
-    toolExecutor: (name: string, args: Record<string, unknown>, ctx: IGaiaToolContext) => Promise<unknown>;
+    toolExecutor: (
+      name: string,
+      args: Record<string, unknown>,
+      ctx: IGaiaToolContext,
+    ) => Promise<unknown>;
     ctx: IGaiaToolContext;
     writeToolNames: string[];
   }): Promise<IGaiaMessageResponse>;

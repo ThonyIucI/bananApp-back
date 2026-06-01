@@ -3,11 +3,10 @@ import {
   WebSocketServer,
   SubscribeMessage,
   OnGatewayDisconnect,
-  UseGuards,
   ConnectedSocket,
   MessageBody,
 } from '@nestjs/websockets';
-import { Inject, Logger } from '@nestjs/common';
+import { Inject, Logger, UseGuards } from '@nestjs/common';
 import type { Server, Socket } from 'socket.io';
 import {
   ILLMService,
@@ -25,8 +24,13 @@ import {
   GAIA_WRITE_TOOLS,
   toFunctionDeclarations,
 } from '../../tools/gaia-tool-registry';
-import type { IGaiaTool, IGaiaToolContext, IPendingAction } from '../../tools/gaia-tool.types';
+import type {
+  IGaiaTool,
+  IGaiaToolContext,
+  IPendingAction,
+} from '../../tools/gaia-tool.types';
 import type { JwtPayload } from '../../../auth/infrastructure/jwt.strategy';
+import { EGaiaLiveEvent } from './gaia-live-event.enum';
 
 interface IActiveSession {
   liveSession: ILiveSession;
@@ -36,7 +40,10 @@ interface IActiveSession {
 
 @WebSocketGateway({
   namespace: '/gaia-live',
-  cors: { origin: process.env.FRONTEND_URL ?? 'http://localhost:3000', credentials: true },
+  cors: {
+    origin: process.env.FRONTEND_URL ?? 'http://localhost:3000',
+    credentials: true,
+  },
 })
 export class GaiaLiveGateway implements OnGatewayDisconnect {
   @WebSocketServer() readonly server!: Server;
@@ -73,9 +80,9 @@ export class GaiaLiveGateway implements OnGatewayDisconnect {
   }
 
   @UseGuards(WsJwtGuard)
-  @SubscribeMessage('live:start')
+  @SubscribeMessage(EGaiaLiveEvent.START)
   async handleStart(@ConnectedSocket() client: Socket): Promise<void> {
-    const user = client.data.user as JwtPayload;
+    const user = (client.data as { user: JwtPayload }).user;
 
     // Close any existing session for this user (1 active session per user)
     const existingSocketId = this.userSockets.get(user.sub);
@@ -90,7 +97,7 @@ export class GaiaLiveGateway implements OnGatewayDisconnect {
     try {
       await this.quotaService.assertWithinQuota(user.sub);
     } catch {
-      client.emit('live:quota_exceeded', {});
+      client.emit(EGaiaLiveEvent.QUOTA_EXCEEDED, {});
       return;
     }
 
@@ -101,10 +108,13 @@ export class GaiaLiveGateway implements OnGatewayDisconnect {
       systemPrompt: GAIA_SYSTEM_PROMPT,
       tools: toFunctionDeclarations(this.allTools),
       onAudio: (base64) => {
-        client.emit('live:audio_response', { audio: base64, mimeType: 'audio/pcm;rate=24000' });
+        client.emit(EGaiaLiveEvent.AUDIO_RESPONSE, {
+          audio: base64,
+          mimeType: 'audio/pcm;rate=24000',
+        });
       },
       onText: (text, isFinal) => {
-        client.emit('live:text_response', { text, isFinal });
+        client.emit(EGaiaLiveEvent.TEXT_RESPONSE, { text, isFinal });
       },
       onToolCall: async (name, args) => {
         const tool = toolMap.get(name);
@@ -114,38 +124,17 @@ export class GaiaLiveGateway implements OnGatewayDisconnect {
 
         if (this.writeToolNames.includes(name)) {
           const pendingAction = result as IPendingAction;
-          client.emit('live:pending_action', pendingAction);
+          client.emit(EGaiaLiveEvent.PENDING_ACTION, pendingAction);
           return { queued: true, humanSummary: pendingAction.humanSummary };
         }
 
         return result;
       },
-      onTurnComplete: async () => {
-        client.emit('live:turn_complete', {});
-        try {
-          await this.quotaService.incrementUsage(user.sub);
-          const remaining = await this.quotaService.getRemainingInteractions(user.sub);
-          client.emit('live:quota_update', {
-            remaining: remaining.remaining,
-            limit: remaining.limit,
-            percentage: Math.round((remaining.remaining / remaining.limit) * 100),
-          });
-
-          if (remaining.remaining <= 0) {
-            client.emit('live:quota_exceeded', {});
-            const session = this.sessions.get(client.id);
-            if (session) {
-              session.liveSession.close();
-              this.sessions.delete(client.id);
-              this.userSockets.delete(user.sub);
-            }
-          }
-        } catch (err) {
-          this.logger.error('Error updating quota', err);
-        }
+      onTurnComplete: () => {
+        void this.handleTurnComplete(client, user.sub);
       },
       onError: (message) => {
-        client.emit('live:error', { message });
+        client.emit(EGaiaLiveEvent.ERROR, { message });
       },
       onClose: () => {
         this.sessions.delete(client.id);
@@ -153,13 +142,50 @@ export class GaiaLiveGateway implements OnGatewayDisconnect {
       },
     });
 
-    this.sessions.set(client.id, { liveSession, userId: user.sub, startedAt: new Date() });
+    this.sessions.set(client.id, {
+      liveSession,
+      userId: user.sub,
+      startedAt: new Date(),
+    });
     this.userSockets.set(user.sub, client.id);
     this.logger.log(`Live session started for user ${user.sub}`);
   }
 
+  /**
+   * Incrementa el uso de cuota al terminar un turno, notifica la cuota restante
+   * y cierra la sesión si el usuario agotó sus interacciones.
+   */
+  private async handleTurnComplete(
+    client: Socket,
+    userId: string,
+  ): Promise<void> {
+    client.emit(EGaiaLiveEvent.TURN_COMPLETE, {});
+    try {
+      await this.quotaService.incrementUsage(userId);
+      const remaining =
+        await this.quotaService.getRemainingInteractions(userId);
+      client.emit(EGaiaLiveEvent.QUOTA_UPDATE, {
+        remaining: remaining.remaining,
+        limit: remaining.limit,
+        percentage: Math.round((remaining.remaining / remaining.limit) * 100),
+      });
+
+      if (remaining.remaining <= 0) {
+        client.emit(EGaiaLiveEvent.QUOTA_EXCEEDED, {});
+        const session = this.sessions.get(client.id);
+        if (session) {
+          session.liveSession.close();
+          this.sessions.delete(client.id);
+          this.userSockets.delete(userId);
+        }
+      }
+    } catch (err) {
+      this.logger.error('Error updating quota', err);
+    }
+  }
+
   @UseGuards(WsJwtGuard)
-  @SubscribeMessage('live:audio')
+  @SubscribeMessage(EGaiaLiveEvent.AUDIO)
   handleAudio(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { audio: string },
@@ -170,7 +196,7 @@ export class GaiaLiveGateway implements OnGatewayDisconnect {
   }
 
   @UseGuards(WsJwtGuard)
-  @SubscribeMessage('live:text')
+  @SubscribeMessage(EGaiaLiveEvent.TEXT)
   handleText(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { text: string },
@@ -180,7 +206,7 @@ export class GaiaLiveGateway implements OnGatewayDisconnect {
     session.liveSession.sendText(data.text);
   }
 
-  @SubscribeMessage('live:end')
+  @SubscribeMessage(EGaiaLiveEvent.END)
   handleEnd(@ConnectedSocket() client: Socket): void {
     const session = this.sessions.get(client.id);
     if (!session) return;

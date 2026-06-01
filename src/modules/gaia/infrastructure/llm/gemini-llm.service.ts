@@ -1,6 +1,11 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { GoogleGenAI, Modality, Type } from '@google/genai';
-import type { FunctionDeclaration, FunctionCall } from '@google/genai';
+import type {
+  FunctionDeclaration,
+  Content,
+  LiveServerMessage,
+  Session,
+} from '@google/genai';
 import {
   ILLMService,
   IGaiaHistoryEntry,
@@ -15,13 +20,13 @@ import type { IGaiaToolContext } from '../../tools/gaia-tool.types';
 
 const CATEGORY_VALUES = Object.values(EGaiaQueryCategory);
 const MAX_TOOL_ITERATIONS = 3;
-const LIVE_MODEL = 'gemini-2.0-flash-live-001';
 
 @Injectable()
 export class GeminiLLMService implements ILLMService, OnModuleInit {
   private readonly logger = new Logger(GeminiLLMService.name);
   private client!: GoogleGenAI;
   private geminyModel: string = process.env.GEMINY_LLM_MODEL;
+  private geminyLiveModel: string = process.env.GEMINY_LIVE_MODEL;
 
   onModuleInit(): void {
     const apiKey = process.env.GEMINY_LLM_API_KEY;
@@ -42,7 +47,7 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
     history: IGaiaHistoryEntry[];
     userMessage: string;
   }): Promise<string> {
-    const contents = [
+    const contents: Content[] = [
       ...history.map((entry) => ({
         role: entry.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: entry.text }],
@@ -83,11 +88,15 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
     history: IGaiaHistoryEntry[];
     userMessage: string;
     toolDeclarations: FunctionDeclaration[];
-    toolExecutor: (name: string, args: Record<string, unknown>, ctx: IGaiaToolContext) => Promise<unknown>;
+    toolExecutor: (
+      name: string,
+      args: Record<string, unknown>,
+      ctx: IGaiaToolContext,
+    ) => Promise<unknown>;
     ctx: IGaiaToolContext;
     writeToolNames: string[];
   }): Promise<IGaiaMessageResponse> {
-    const contents = [
+    const contents: Content[] = [
       ...history.map((entry) => ({
         role: entry.role === 'assistant' ? 'model' : 'user',
         parts: [{ text: entry.text }],
@@ -105,7 +114,10 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
         contents,
         config: {
           systemInstruction: systemPrompt,
-          tools: toolDeclarations.length > 0 ? [{ functionDeclarations: toolDeclarations }] : undefined,
+          tools:
+            toolDeclarations.length > 0
+              ? [{ functionDeclarations: toolDeclarations }]
+              : undefined,
         },
       });
 
@@ -119,20 +131,23 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
         return { text, pendingAction: null };
       }
 
-      const fc = functionCallParts[0].functionCall as FunctionCall;
+      const fc = functionCallParts[0].functionCall;
       const toolName = fc.name ?? '';
-      const toolArgs = (fc.args ?? {}) as Record<string, unknown>;
+      const toolArgs = fc.args ?? {};
 
       if (writeToolNames.includes(toolName)) {
         const result = await toolExecutor(toolName, toolArgs, ctx);
-        const pendingAction = result as import('../../tools/gaia-tool.types').IPendingAction;
+        const pendingAction =
+          result as import('../../tools/gaia-tool.types').IPendingAction;
         return { text: pendingAction.humanSummary, pendingAction };
       }
 
-      const toolResult = await toolExecutor(toolName, toolArgs, ctx).catch((err: unknown) => {
-        this.logger.error(`Tool "${toolName}" failed`, err);
-        return { error: 'No se pudo obtener la información.' };
-      });
+      const toolResult = await toolExecutor(toolName, toolArgs, ctx).catch(
+        (err: unknown) => {
+          this.logger.error(`Tool "${toolName}" failed`, err);
+          return { error: 'No se pudo obtener la información.' };
+        },
+      );
 
       contents.push(
         { role: 'model', parts: [{ functionCall: fc }] },
@@ -156,23 +171,18 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
   /**
    * Crea una sesión de Gemini Live para conversación de voz en tiempo real.
    */
-  async createLiveSession(options: IGaiaLiveSessionOptions): Promise<ILiveSession> {
-    const {
-      systemPrompt,
-      tools,
-      onAudio,
-      onText,
-      onToolCall,
-      onTurnComplete,
-      onError,
-      onClose,
-    } = options;
+  async createLiveSession(
+    options: IGaiaLiveSessionOptions,
+  ): Promise<ILiveSession> {
+    const { systemPrompt, tools, onError, onClose } = options;
 
     const session = await this.client.live.connect({
-      model: LIVE_MODEL,
+      model: this.geminyLiveModel,
       config: {
         responseModalities: [Modality.AUDIO, Modality.TEXT],
-        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } },
+        speechConfig: {
+          voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } },
+        },
         systemInstruction: { parts: [{ text: systemPrompt }] },
         tools: tools.length > 0 ? [{ functionDeclarations: tools }] : undefined,
       },
@@ -180,41 +190,8 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
         onopen: () => {
           this.logger.log('Gemini Live session opened');
         },
-        onmessage: async (message) => {
-          try {
-            if (message.serverContent?.modelTurn?.parts) {
-              for (const part of message.serverContent.modelTurn.parts) {
-                if (part.text) {
-                  onText(part.text, false);
-                }
-                if (part.inlineData?.data) {
-                  onAudio(part.inlineData.data);
-                }
-              }
-            }
-
-            if (message.serverContent?.turnComplete) {
-              onTurnComplete();
-            }
-
-            if (message.toolCall?.functionCalls) {
-              for (const fc of message.toolCall.functionCalls) {
-                const result = await onToolCall(fc.name ?? '', (fc.args ?? {}) as Record<string, unknown>);
-                session.sendToolResponse({
-                  functionResponses: [
-                    {
-                      id: fc.id ?? fc.name ?? '',
-                      name: fc.name ?? '',
-                      response: { result },
-                    },
-                  ],
-                });
-              }
-            }
-          } catch (err) {
-            this.logger.error('Error handling live message', err);
-            onError('Error interno al procesar respuesta de GaIA.');
-          }
+        onmessage: (message) => {
+          void this.handleLiveMessage(message, session, options);
         },
         onerror: (err) => {
           this.logger.error('Gemini Live error', err);
@@ -243,6 +220,52 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
         session.close();
       },
     };
+  }
+
+  /**
+   * Procesa cada mensaje entrante de la sesión Live: emite texto/audio al cliente,
+   * señala el fin de turno y resuelve las tool calls solicitadas por el modelo.
+   */
+  private async handleLiveMessage(
+    message: LiveServerMessage,
+    session: Session,
+    options: IGaiaLiveSessionOptions,
+  ): Promise<void> {
+    const { onAudio, onText, onToolCall, onTurnComplete, onError } = options;
+    try {
+      if (message.serverContent?.modelTurn?.parts) {
+        for (const part of message.serverContent.modelTurn.parts) {
+          if (part.text) {
+            onText(part.text, false);
+          }
+          if (part.inlineData?.data) {
+            onAudio(part.inlineData.data);
+          }
+        }
+      }
+
+      if (message.serverContent?.turnComplete) {
+        onTurnComplete();
+      }
+
+      if (message.toolCall?.functionCalls) {
+        for (const fc of message.toolCall.functionCalls) {
+          const result = await onToolCall(fc.name ?? '', fc.args ?? {});
+          session.sendToolResponse({
+            functionResponses: [
+              {
+                id: fc.id ?? fc.name ?? '',
+                name: fc.name ?? '',
+                response: { result },
+              },
+            ],
+          });
+        }
+      }
+    } catch (err) {
+      this.logger.error('Error handling live message', err);
+      onError('Error interno al procesar respuesta de GaIA.');
+    }
   }
 
   /**
