@@ -176,10 +176,16 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
   ): Promise<ILiveSession> {
     const { systemPrompt, tools, onError, onClose } = options;
 
+    console.log(
+      `[GEMINI] 🔌 Conectando a live session... modelo=${this.geminyLiveModel}\n`,
+    );
+    console.log(`[GEMINI] Tools disponibles: ${tools.length}\n`);
+
     const session = await this.client.live.connect({
       model: this.geminyLiveModel,
       config: {
-        responseModalities: [Modality.AUDIO, Modality.TEXT],
+        responseModalities: [Modality.AUDIO],
+        outputAudioTranscription: {},
         speechConfig: {
           voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } },
         },
@@ -188,26 +194,32 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
       },
       callbacks: {
         onopen: () => {
-          this.logger.log('Gemini Live session opened');
+          console.log(`[GEMINI] ✅ Session ABIERTA (onopen)\n`);
         },
         onmessage: (message) => {
+          console.log(`[GEMINI] 📨 Mensaje recibido (onmessage)\n`);
           void this.handleLiveMessage(message, session, options);
         },
         onerror: (err) => {
-          this.logger.error('Gemini Live error', err);
+          console.log(`[GEMINI] ❌ Error en sesión:`, err, '\n');
           onError('Error de conexión con GaIA.');
         },
-        onclose: () => {
-          this.logger.log('Gemini Live session closed');
+        onclose: (e: any) => {
+          console.log(
+            e,
+            `[GEMINI] 🔌 Session CERRADA (onclose) — code=${e?.code} reason="${e?.reason}" wasClean=${e?.wasClean}\n`,
+          );
           onClose();
         },
       },
     });
 
+    console.log(`[GEMINI] ✅ Session creada y conectada\n`);
+
     return {
       sendAudio: (base64Pcm16: string) => {
         session.sendRealtimeInput({
-          media: { data: base64Pcm16, mimeType: 'audio/pcm;rate=16000' },
+          audio: { data: base64Pcm16, mimeType: 'audio/pcm;rate=16000' },
         });
       },
       sendText: (text: string) => {
@@ -234,23 +246,42 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
     const { onAudio, onText, onToolCall, onTurnComplete, onError } = options;
     try {
       if (message.serverContent?.modelTurn?.parts) {
+        console.log(
+          `[GEMINI handleLiveMessage] modelTurn con ${message.serverContent.modelTurn.parts.length} parts\n`,
+        );
         for (const part of message.serverContent.modelTurn.parts) {
           if (part.text) {
+            console.log(
+              `[GEMINI handleLiveMessage] 📝 Text: "${part.text.substring(0, 50)}..."\n`,
+            );
             onText(part.text, false);
           }
           if (part.inlineData?.data) {
+            console.log(
+              `[GEMINI handleLiveMessage] 🔊 Audio: ${part.inlineData.data.length} bytes\n`,
+            );
             onAudio(part.inlineData.data);
           }
         }
       }
 
       if (message.serverContent?.turnComplete) {
+        console.log(`[GEMINI handleLiveMessage] 🔄 turnComplete\n`);
         onTurnComplete();
       }
 
       if (message.toolCall?.functionCalls) {
+        console.log(
+          `[GEMINI handleLiveMessage] 🛠️  ${message.toolCall.functionCalls.length} tool calls\n`,
+        );
         for (const fc of message.toolCall.functionCalls) {
+          console.log(
+            `[GEMINI handleLiveMessage] → Ejecutando tool: ${fc.name}\n`,
+          );
           const result = await onToolCall(fc.name ?? '', fc.args ?? {});
+          console.log(
+            `[GEMINI handleLiveMessage] → Tool result: ${JSON.stringify(result).substring(0, 50)}\n`,
+          );
           session.sendToolResponse({
             functionResponses: [
               {
@@ -263,7 +294,7 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
         }
       }
     } catch (err) {
-      this.logger.error('Error handling live message', err);
+      console.log(`[GEMINI handleLiveMessage] ❌ Error:`, err, '\n');
       onError('Error interno al procesar respuesta de GaIA.');
     }
   }

@@ -1,3 +1,15 @@
+/**
+ * Límites de capacidad por plan de GaIA.
+ *
+ * `dailyInteractions` — número máximo de **turnos** (intercambios completos) por día.
+ * Un turno = el usuario habla/escribe + GaIA responde.
+ * No tiene nada que ver con tokens: cada conversación completa
+ * (sin importar su longitud) consume exactamente 1 interacción.
+ *
+ * Plan free: 30 turnos/día (~30 preguntas respondidas).
+ * Plan pro: 150 turnos/día.
+ * Plan promax: 500 turnos/día.
+ */
 export const GAIA_PLAN_LIMITS = {
   free: {
     dailyInteractions: 30,

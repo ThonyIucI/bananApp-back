@@ -10,6 +10,7 @@ export enum EGaiaLiveEvent {
   TEXT = 'live:text',
   END = 'live:end',
   // Server → Client
+  READY = 'live:ready',
   AUDIO_RESPONSE = 'live:audio_response',
   TEXT_RESPONSE = 'live:text_response',
   PENDING_ACTION = 'live:pending_action',
