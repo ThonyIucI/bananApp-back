@@ -65,6 +65,11 @@ import { CropTypesModule } from '../crop-types/crop-types.module';
     SubPlotsByPlotController,
     SubPlotsByIdController,
   ],
-  exports: [IPlotRepository, ISubPlotRepository, IUserPlotRepository],
+  exports: [
+    IPlotRepository,
+    ISubPlotRepository,
+    IUserPlotRepository,
+    ListPlotsHandler,
+  ],
 })
 export class PlotsModule {}

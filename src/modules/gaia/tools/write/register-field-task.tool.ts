@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Type } from '@google/genai';
-import type {
-  IGaiaTool,
-  IGaiaToolContext,
-  IPendingAction,
-} from '../gaia-tool.types';
+import { EGaiaToolName } from '../gaia-tool.types';
+import type { IGaiaTool, IPendingAction } from '../gaia-tool.types';
 
 /** Formatea una fecha ISO 8601 a `DD/MM/YYYY HH:mm`. Devuelve el valor original si no es parseable. */
 const formatPerformedAt = (isoDate: string): string => {
@@ -23,10 +20,10 @@ const formatPerformedAt = (isoDate: string): string => {
 
 @Injectable()
 export class RegisterFieldTaskTool implements IGaiaTool {
-  readonly name = 'register_field_task';
+  readonly name = EGaiaToolName.REGISTER_FIELD_TASK;
 
   readonly declaration = {
-    name: 'register_field_task',
+    name: EGaiaToolName.REGISTER_FIELD_TASK,
     description:
       'Propone registrar una actividad agrícola. NUNCA persiste directamente — siempre genera una confirmación que el usuario debe aprobar. Úsalo cuando el usuario diga que hizo algo (fumigó, regó, fertilizó, etc.).',
     parameters: {
@@ -61,10 +58,7 @@ export class RegisterFieldTaskTool implements IGaiaTool {
     },
   };
 
-  async execute(
-    args: Record<string, unknown>,
-    _ctx: IGaiaToolContext,
-  ): Promise<IPendingAction> {
+  execute(args: Record<string, unknown>): Promise<IPendingAction> {
     const plotId = args.plotId as string;
     const taskTypeKey = args.taskTypeKey as string;
     const taskLabel = args.taskLabel as string;
@@ -75,10 +69,10 @@ export class RegisterFieldTaskTool implements IGaiaTool {
 
     const humanSummary = `Registrar: ${taskLabel} · ${dateStr}${notes ? ` · Nota: ${notes}` : ''}`;
 
-    return {
+    return Promise.resolve({
       tool: this.name,
       payload: { plotId, taskTypeKey, performedAt, notes: notes ?? null },
       humanSummary,
-    };
+    });
   }
 }

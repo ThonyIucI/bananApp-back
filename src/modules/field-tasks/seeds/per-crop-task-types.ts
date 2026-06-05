@@ -54,6 +54,29 @@ export const PER_CROP_TASK_TYPES: TSeedTaskType[] = [
     ],
   },
 
+  // --- Rice / Onion ---
+  {
+    key: 'transplanting',
+    label: 'Trasplante de almácigo',
+    cropTypeKeys: ['rice', 'onion'],
+    details: [
+      {
+        detailKey: 'area_ha',
+        label: 'Área trasplantada (ha)',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: true,
+        sortOrder: 1,
+      },
+      {
+        detailKey: 'seedling_age_days',
+        label: 'Edad de plántula (días)',
+        valueType: EDetailValueType.NUMERIC,
+        isRequired: false,
+        sortOrder: 2,
+      },
+    ],
+  },
+
   // --- Mango ---
   {
     key: 'floral_induction',

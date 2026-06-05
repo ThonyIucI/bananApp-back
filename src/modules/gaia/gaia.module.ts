@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
+import { PlotsModule } from '../plots/plots.module';
 import { GaiaUsage } from './domain/gaia-usage.entity';
 import { GaiaQuery } from './domain/gaia-query.entity';
 import { IGaiaUsageRepository } from './domain/gaia-usage.repository';
@@ -24,6 +25,7 @@ import { WsJwtGuard } from '../shared/guards/ws-jwt.guard';
   imports: [
     MikroOrmModule.forFeature([GaiaUsage, GaiaQuery, User]),
     JwtModule.register({}),
+    PlotsModule,
   ],
   providers: [
     { provide: IGaiaUsageRepository, useClass: MikroOrmGaiaUsageRepository },

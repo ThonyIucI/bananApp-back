@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { EntityManager } from '@mikro-orm/postgresql';
 import { Type } from '@google/genai';
 import { EGaiaToolName } from '../gaia-tool.types';
 import type {
@@ -7,7 +6,7 @@ import type {
   IGaiaToolContext,
   TGaiaToolResult,
 } from '../gaia-tool.types';
-import { Plot } from '../../../plots/domain/plot.entity';
+import { ListPlotsHandler } from '../../../plots/queries/list-plots.handler';
 
 @Injectable()
 export class ListMyPlotsTool implements IGaiaTool {
@@ -24,19 +23,17 @@ export class ListMyPlotsTool implements IGaiaTool {
     },
   };
 
-  constructor(private readonly em: EntityManager) {}
+  constructor(private readonly listPlotsHandler: ListPlotsHandler) {}
 
   async execute(
     _args: Record<string, unknown>,
     ctx: IGaiaToolContext,
   ): Promise<TGaiaToolResult> {
-    const plots = await this.em.find(
-      Plot,
-      { ownerUser: { id: ctx.currentUser.sub } },
-      { populate: ['sector', 'cropType'] },
-    );
+    const { items } = await this.listPlotsHandler.execute({
+      ownerUserId: ctx.currentUser.sub,
+    });
 
-    return plots.map((p) => ({
+    return items.map((p) => ({
       id: p.id,
       name: p.name,
       areaHa: p.areaHectares,
