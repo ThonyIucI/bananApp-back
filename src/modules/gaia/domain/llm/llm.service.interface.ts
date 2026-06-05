@@ -24,6 +24,8 @@ export interface IGaiaMessageResponse {
 export interface IGaiaLiveSessionOptions {
   systemPrompt: string;
   tools: FunctionDeclaration[];
+  /** Optional compact context block appended to systemPrompt (plots + task schemas). */
+  userContextBlock?: string;
   onAudio: (base64: string) => void;
   onText: (text: string, isFinal: boolean) => void;
   /** Called when the model requests a tool call. Return the result as a JSON-serializable value. */

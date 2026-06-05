@@ -13,6 +13,7 @@ import { GaiaQuotaService } from './application/gaia-quota.service';
 import { GaiaConversationService } from './application/gaia-conversation.service';
 import { GaiaQueryAnalyticsListener } from './application/gaia-query-analytics.listener';
 import { GaiaFeedbackService } from './application/gaia-feedback.service';
+import { GaiaSessionContextService } from './application/gaia-session-context.service';
 import { GaiaController } from './channels/http/gaia.controller';
 import { GaiaLiveGateway } from './channels/ws/gaia-live.gateway';
 import { User } from '../users/domain/user.entity';
@@ -20,12 +21,14 @@ import { ListMyPlotsTool } from './tools/read/list-my-plots.tool';
 import { GetFieldTasksTool } from './tools/read/get-field-tasks.tool';
 import { RegisterFieldTaskTool } from './tools/write/register-field-task.tool';
 import { WsJwtGuard } from '../shared/guards/ws-jwt.guard';
+import { FieldTasksModule } from '../field-tasks/field-tasks.module';
 
 @Module({
   imports: [
     MikroOrmModule.forFeature([GaiaUsage, GaiaQuery, User]),
     JwtModule.register({}),
     PlotsModule,
+    FieldTasksModule,
   ],
   providers: [
     { provide: IGaiaUsageRepository, useClass: MikroOrmGaiaUsageRepository },
@@ -34,6 +37,7 @@ import { WsJwtGuard } from '../shared/guards/ws-jwt.guard';
     GaiaConversationService,
     GaiaQueryAnalyticsListener,
     GaiaFeedbackService,
+    GaiaSessionContextService,
     GeminiTtsService,
     // Tools
     ListMyPlotsTool,

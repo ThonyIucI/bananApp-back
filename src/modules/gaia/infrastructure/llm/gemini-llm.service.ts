@@ -189,7 +189,15 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
         speechConfig: {
           voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } },
         },
-        systemInstruction: { parts: [{ text: systemPrompt }] },
+        systemInstruction: {
+          parts: [
+            {
+              text: options.userContextBlock
+                ? `${systemPrompt}\n\n${options.userContextBlock}`
+                : systemPrompt,
+            },
+          ],
+        },
         tools: tools.length > 0 ? [{ functionDeclarations: tools }] : undefined,
       },
       callbacks: {
