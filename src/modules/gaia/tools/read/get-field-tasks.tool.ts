@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Type } from '@google/genai';
-import type { IGaiaTool, IGaiaToolContext, TGaiaToolResult } from '../gaia-tool.types';
+import { EGaiaToolName } from '../gaia-tool.types';
+import type {
+  IGaiaTool,
+  IGaiaToolContext,
+  TGaiaToolResult,
+} from '../gaia-tool.types';
 import { FieldTask } from '../../../field-tasks/domain/field-task.entity';
 
 type TPeriod = 'today' | 'week' | 'month';
@@ -18,10 +23,10 @@ const buildDateRange = (period: TPeriod): { from: Date; to: Date } => {
 
 @Injectable()
 export class GetFieldTasksTool implements IGaiaTool {
-  readonly name = 'get_field_tasks';
+  readonly name = EGaiaToolName.GET_FIELD_TASKS;
 
   readonly declaration = {
-    name: 'get_field_tasks',
+    name: EGaiaToolName.GET_FIELD_TASKS,
     description:
       'Consulta las actividades agrícolas del usuario. Úsalo cuando pregunte cuántos riegos, fumigaciones, fertilizaciones u otras labores realizó en un período o parcela específica.',
     parameters: {

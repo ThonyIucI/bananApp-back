@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Type } from '@google/genai';
+import { EGaiaToolName } from '../gaia-tool.types';
 import type {
   IGaiaTool,
   IGaiaToolContext,
@@ -10,10 +11,10 @@ import { Plot } from '../../../plots/domain/plot.entity';
 
 @Injectable()
 export class ListMyPlotsTool implements IGaiaTool {
-  readonly name = 'list_my_plots';
+  readonly name = EGaiaToolName.LIST_MY_PLOTS;
 
   readonly declaration = {
-    name: 'list_my_plots',
+    name: EGaiaToolName.LIST_MY_PLOTS,
     description:
       'Lista las parcelas del agricultor autenticado con su nombre, área y sector. Úsalo cuando el usuario pregunte por sus parcelas o lotes.',
     parameters: {
