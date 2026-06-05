@@ -46,6 +46,6 @@ import { CropTypesModule } from '../crop-types/crop-types.module';
     SeedTaskTypesService,
   ],
   controllers: [FieldTasksController],
-  exports: [SeedTaskTypesService, ITaskTypeRepository],
+  exports: [SeedTaskTypesService, ITaskTypeRepository, CreateFieldTaskHandler],
 })
 export class FieldTasksModule {}

@@ -1,23 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { Type } from '@google/genai';
-import { EGaiaToolName } from '../gaia-tool.types';
-import type { IGaiaTool, IPendingAction } from '../gaia-tool.types';
+import { EGaiaToolName, IToolConfirmation } from '../gaia-tool.types';
+import type { IGaiaTool, IGaiaToolContext } from '../gaia-tool.types';
+import { CreateFieldTaskHandler } from '../../../field-tasks/commands/create-field-task.handler';
+import { formatDateTime } from '../../../shared/utils/date.util';
 
-/** Formatea una fecha ISO 8601 a `DD/MM/YYYY HH:mm`. Devuelve el valor original si no es parseable. */
-const formatPerformedAt = (isoDate: string): string => {
-  const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) return isoDate;
-
-  const pad = (n: number) => String(n).padStart(2, '0');
-  const day = pad(date.getDate());
-  const month = pad(date.getMonth() + 1);
-  const year = date.getFullYear();
-  const hours = pad(date.getHours());
-  const minutes = pad(date.getMinutes());
-
-  return `${day}/${month}/${year} ${hours}:${minutes}`;
+const buildHumanSummary = (
+  taskLabel: string,
+  rawDetails: Record<string, string>,
+  performedAt: string,
+): string => {
+  const detailParts = Object.entries(rawDetails).map(([k, v]) => `${k}: ${v}`);
+  return [
+    taskLabel,
+    ...detailParts,
+    formatDateTime(performedAt),
+    'realizado por ti',
+  ].join(' · ');
 };
 
+/**
+ * Write tool: persists a field task directly (no pending-action flow in live mode).
+ * GaIA verbally confirms data with the user before calling this tool.
+ */
 @Injectable()
 export class RegisterFieldTaskTool implements IGaiaTool {
   readonly name = EGaiaToolName.REGISTER_FIELD_TASK;
@@ -25,54 +30,72 @@ export class RegisterFieldTaskTool implements IGaiaTool {
   readonly declaration = {
     name: EGaiaToolName.REGISTER_FIELD_TASK,
     description:
-      'Propone registrar una actividad agrícola. NUNCA persiste directamente — siempre genera una confirmación que el usuario debe aprobar. Úsalo cuando el usuario diga que hizo algo (fumigó, regó, fertilizó, etc.).',
+      'Registra una actividad agrícola. Úsalo SOLO después de confirmar verbalmente los datos con el agricultor. Persiste de inmediato — no hay paso adicional de confirmación.',
     parameters: {
       type: Type.OBJECT,
       properties: {
         plotId: {
           type: Type.STRING,
-          description:
-            'ID de la parcela donde se realizó la actividad. Usar list_my_plots para obtener el ID correcto.',
+          description: 'ID de la parcela. Usar list_my_plots para obtenerlo.',
         },
         taskTypeKey: {
           type: Type.STRING,
           description:
-            'Clave del tipo de actividad (ej: irrigation, pest_control, fertilization).',
+            'Clave del tipo de actividad (ej: bundling, irrigation, harvest).',
         },
         taskLabel: {
           type: Type.STRING,
           description:
-            'Nombre legible de la actividad para mostrar al usuario en la confirmación.',
+            'Nombre legible de la actividad para el resumen de confirmación.',
         },
         performedAt: {
           type: Type.STRING,
-          description:
-            'Fecha y hora ISO 8601 en que se realizó la actividad (ej: 2025-05-31T07:00:00).',
+          description: 'Fecha y hora ISO 8601 en que se realizó la actividad.',
         },
         notes: {
           type: Type.STRING,
-          description: 'Notas adicionales opcionales sobre la actividad.',
+          description: 'Notas adicionales opcionales.',
+        },
+        details: {
+          type: Type.OBJECT,
+          description:
+            'Detalles específicos del tipo de actividad (campo: valor). Claves y valores según el esquema ACT del contexto de la sesión.',
+          additionalProperties: { type: Type.STRING },
         },
       },
       required: ['plotId', 'taskTypeKey', 'taskLabel', 'performedAt'],
     },
   };
 
-  execute(args: Record<string, unknown>): Promise<IPendingAction> {
+  constructor(private readonly createFieldTask: CreateFieldTaskHandler) {}
+
+  async execute(
+    args: Record<string, unknown>,
+    ctx: IGaiaToolContext,
+  ): Promise<IToolConfirmation> {
     const plotId = args.plotId as string;
     const taskTypeKey = args.taskTypeKey as string;
     const taskLabel = args.taskLabel as string;
     const performedAt = args.performedAt as string;
-    const notes = args.notes as string | undefined;
+    const notes = (args.notes as string | undefined) ?? null;
+    const rawDetails =
+      (args.details as Record<string, string> | undefined) ?? {};
 
-    const dateStr = formatPerformedAt(performedAt);
-
-    const humanSummary = `Registrar: ${taskLabel} · ${dateStr}${notes ? ` · Nota: ${notes}` : ''}`;
-
-    return Promise.resolve({
-      tool: this.name,
-      payload: { plotId, taskTypeKey, performedAt, notes: notes ?? null },
-      humanSummary,
+    await this.createFieldTask.execute({
+      plotId,
+      taskTypeKey,
+      performedAt: new Date(performedAt),
+      notes,
+      details: Object.entries(rawDetails).map(([detailKey, value]) => ({
+        detailKey,
+        value,
+      })),
+      performedByUserId: ctx.currentUser.sub,
     });
+
+    return {
+      confirmed: true,
+      humanSummary: buildHumanSummary(taskLabel, rawDetails, performedAt),
+    };
   }
 }

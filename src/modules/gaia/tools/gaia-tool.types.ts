@@ -32,6 +32,13 @@ export interface IFieldTaskPendingPayload {
   details: Record<string, string | number>;
 }
 
+/** Result returned by a write tool that persists directly (live mode). */
+export interface IToolConfirmation {
+  confirmed: true;
+  /** Human-readable summary shown to the user after the action is persisted. */
+  humanSummary: string;
+}
+
 export interface IGaiaTool {
   /** Matches the name used in the Gemini function declaration. */
   readonly name: string;
@@ -39,5 +46,5 @@ export interface IGaiaTool {
   execute(
     args: Record<string, unknown>,
     ctx: IGaiaToolContext,
-  ): Promise<TGaiaToolResult | IPendingAction>;
+  ): Promise<TGaiaToolResult | IPendingAction | IToolConfirmation>;
 }

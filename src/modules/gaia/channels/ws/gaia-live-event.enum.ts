@@ -17,5 +17,6 @@ export enum EGaiaLiveEvent {
   TURN_COMPLETE = 'live:turn_complete',
   QUOTA_UPDATE = 'live:quota_update',
   QUOTA_EXCEEDED = 'live:quota_exceeded',
+  ACTION_CONFIRMED = 'live:action_confirmed',
   ERROR = 'live:error',
 }

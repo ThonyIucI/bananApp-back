@@ -30,7 +30,7 @@ import {
 import type {
   IGaiaTool,
   IGaiaToolContext,
-  IPendingAction,
+  IToolConfirmation,
 } from '../../tools/gaia-tool.types';
 import type { JwtPayload } from '../../../auth/infrastructure/jwt.strategy';
 import { EGaiaLiveEvent } from './gaia-live-event.enum';
@@ -171,12 +171,17 @@ export class GaiaLiveGateway implements OnGatewayDisconnect {
             const result = await tool.execute(args, ctx);
 
             if (this.writeToolNames.includes(name)) {
-              const pendingAction = result as IPendingAction;
+              const confirmation = result as IToolConfirmation;
               console.log(
-                `[LIVE onToolCall] ✅ Write tool ejecutado, emitiendo PENDING_ACTION\n`,
+                `[LIVE onToolCall] ✅ Write tool persistido, emitiendo ACTION_CONFIRMED\n`,
               );
-              client.emit(EGaiaLiveEvent.PENDING_ACTION, pendingAction);
-              return { queued: true, humanSummary: pendingAction.humanSummary };
+              client.emit(EGaiaLiveEvent.ACTION_CONFIRMED, {
+                humanSummary: confirmation.humanSummary,
+              });
+              return {
+                confirmed: true,
+                humanSummary: confirmation.humanSummary,
+              };
             }
 
             console.log(`[LIVE onToolCall] ✅ Read tool ejecutado\n`);

@@ -1,4 +1,4 @@
-// MikroORM es ESM puro — se mockea antes de cualquier import para evitar errores de parse.
+// MikroORM es ESM puro — se mockea antes de cualquier import.
 jest.mock('@mikro-orm/postgresql', () => ({ EntityManager: class EntityManager {} }));
 jest.mock('@mikro-orm/core', () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -6,14 +6,19 @@ jest.mock('@mikro-orm/core', () => {
     get: (_t, prop) => (typeof prop === 'symbol' ? undefined : c),
     apply: () => c,
   });
-  return { EntityManager: class EntityManager {}, defineEntity: () => ({ class: class {}, setClass: () => {} }), p: c };
+  return {
+    EntityManager: class EntityManager {},
+    defineEntity: () => ({ class: class {}, setClass: () => {} }),
+    p: c,
+  };
 });
 
 import { RegisterFieldTaskTool } from './register-field-task.tool';
+import { CreateFieldTaskHandler } from '../../../field-tasks/commands/create-field-task.handler';
 import type { IGaiaToolContext } from '../gaia-tool.types';
 
 const mockCtx = (): IGaiaToolContext => ({
-  currentUser: { sub: 'user-1', email: 'farmer@test.com', iat: 0, exp: 0 },
+  currentUser: { sub: 'user-1', email: 'farmer@test.com', isSuperadmin: false },
 });
 
 const baseArgs = {
@@ -25,45 +30,65 @@ const baseArgs = {
 
 describe('RegisterFieldTaskTool', () => {
   let tool: RegisterFieldTaskTool;
+  let mockHandler: jest.Mocked<Pick<CreateFieldTaskHandler, 'execute'>>;
 
   beforeEach(() => {
-    tool = new RegisterFieldTaskTool();
+    mockHandler = { execute: jest.fn().mockResolvedValue({}) };
+    tool = new RegisterFieldTaskTool(mockHandler as unknown as CreateFieldTaskHandler);
   });
 
-  it('retorna un IPendingAction con tool, payload y humanSummary', async () => {
+  it('persiste directamente y devuelve confirmed:true', async () => {
     const result = await tool.execute(baseArgs, mockCtx());
-    expect(result).toMatchObject({
-      tool: 'register_field_task',
-      humanSummary: expect.stringContaining('Riego por goteo'),
-      payload: expect.objectContaining({
-        plotId: 'plot-abc',
-        taskTypeKey: 'irrigation',
-        performedAt: '2025-05-31T07:00:00',
+
+    expect(mockHandler.execute).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({ confirmed: true });
+  });
+
+  it('pasa details como array de { detailKey, value } al handler', async () => {
+    const args = {
+      ...baseArgs,
+      details: { ribbonColor: 'verde', bunches: '45' },
+    };
+
+    await tool.execute(args, mockCtx());
+
+    expect(mockHandler.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        details: expect.arrayContaining([
+          { detailKey: 'ribbonColor', value: 'verde' },
+          { detailKey: 'bunches', value: '45' },
+        ]),
       }),
-    });
+    );
   });
 
-  it('nunca persiste directamente (no tiene EntityManager inyectado)', () => {
-    // RegisterFieldTaskTool no recibe EntityManager — solo construye un pendingAction.
-    // Verificamos que el constructor no requiere argumentos de base de datos.
-    expect(() => new RegisterFieldTaskTool()).not.toThrow();
-  });
+  it('humanSummary incluye los details en lenguaje natural', async () => {
+    const args = {
+      ...baseArgs,
+      taskLabel: 'Enfunde',
+      details: { ribbonColor: 'verde', fundas: '45' },
+    };
 
-  it('incluye las notas en el payload y en el humanSummary si se proporcionan', async () => {
-    const args = { ...baseArgs, notes: 'Turno de 2 horas' };
     const result = await tool.execute(args, mockCtx());
-    expect(result.payload).toMatchObject({ notes: 'Turno de 2 horas' });
-    expect(result.humanSummary).toContain('Turno de 2 horas');
+
+    expect(result.humanSummary).toContain('Enfunde');
+    expect(result.humanSummary).toContain('ribbonColor: verde');
+    expect(result.humanSummary).toContain('fundas: 45');
+    expect(result.humanSummary).toContain('realizado por ti');
   });
 
-  it('asigna null a notes en el payload cuando no se pasan', async () => {
-    const result = await tool.execute(baseArgs, mockCtx());
-    expect(result.payload).toMatchObject({ notes: null });
+  it('usa ctx.currentUser.sub como performedByUserId', async () => {
+    await tool.execute(baseArgs, mockCtx());
+
+    expect(mockHandler.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ performedByUserId: 'user-1' }),
+    );
   });
 
-  it('no hace referencia a ctx.currentUser.sub — el write tool no se auto-persiste', async () => {
-    const result = await tool.execute(baseArgs, mockCtx());
-    // El payload no debe filtrar por userId — el controller lo determina desde el JWT del request HTTP
-    expect(JSON.stringify(result.payload)).not.toContain('user-1');
+  it('convierte performedAt string a Date al llamar al handler', async () => {
+    await tool.execute(baseArgs, mockCtx());
+
+    const call = mockHandler.execute.mock.calls[0][0];
+    expect(call.performedAt).toBeInstanceOf(Date);
   });
 });
