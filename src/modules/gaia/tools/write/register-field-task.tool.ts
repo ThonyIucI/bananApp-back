@@ -3,7 +3,7 @@ import { Type } from '@google/genai';
 import { EGaiaToolName, IToolConfirmation } from '../gaia-tool.types';
 import type { IGaiaTool, IGaiaToolContext } from '../gaia-tool.types';
 import { CreateFieldTaskHandler } from '../../../field-tasks/commands/create-field-task.handler';
-import { formatDateTime } from '../../../shared/utils/date.util';
+import { formatDateTime, getWeekOfYear } from '../../../shared/utils/date.util';
 
 const buildHumanSummary = (
   taskLabel: string,
@@ -78,8 +78,15 @@ export class RegisterFieldTaskTool implements IGaiaTool {
     const taskLabel = args.taskLabel as string;
     const performedAt = args.performedAt as string;
     const notes = (args.notes as string | undefined) ?? null;
-    const rawDetails =
-      (args.details as Record<string, string> | undefined) ?? {};
+    let rawDetails = (args.details as Record<string, string> | undefined) ?? {};
+
+    // Auto-compute bundled_week from performedAt when the task is bundling and not provided.
+    if (taskTypeKey === 'bundling' && !rawDetails['bundled_week']) {
+      rawDetails = {
+        ...rawDetails,
+        bundled_week: String(getWeekOfYear(new Date(performedAt))),
+      };
+    }
 
     await this.createFieldTask.execute({
       plotId,

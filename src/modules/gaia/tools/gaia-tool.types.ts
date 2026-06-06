@@ -10,6 +10,7 @@ export enum EGaiaToolName {
   LIST_MY_PLOTS = 'list_my_plots',
   GET_FIELD_TASKS = 'get_field_tasks',
   REGISTER_FIELD_TASK = 'register_field_task',
+  RATE_SESSION = 'rate_session',
 }
 
 /** Result returned by a read tool — JSON-serializable. */
@@ -37,6 +38,12 @@ export interface IToolConfirmation {
   confirmed: true;
   /** Human-readable summary shown to the user after the action is persisted. */
   humanSummary: string;
+}
+
+/** Returned by rate_session tool — signals the gateway to end the session. */
+export interface ISessionEndSignal {
+  sessionEnded: true;
+  score: number;
 }
 
 export interface IGaiaTool {

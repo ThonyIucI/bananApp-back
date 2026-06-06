@@ -3,6 +3,28 @@ import { entityIdV7 } from '../../shared/base.entity';
 import { CropType } from '../../crop-types/domain/crop-type.entity';
 import { TaskTypeDetailSchema } from './task-type-detail-schema.entity';
 
+/**
+ * Catálogo de labores agrícolas soportadas (EAV).
+ * Las keys coinciden con `task_types.key` en backend (seed-task-types.service.ts).
+ */
+export enum ETaskTypeKey {
+  BUNDLING = 'bundling',
+  HARVEST = 'harvest',
+  PRUNING = 'pruning',
+  IRRIGATION = 'irrigation',
+  FERTILIZATION_ORGANIC = 'fertilization_organic',
+  FERTILIZATION_FOLIAR = 'fertilization_foliar',
+  PEST_CONTROL_BIOLOGICAL = 'pest_control_biological',
+  MEASUREMENT = 'measurement',
+  PLANTING = 'planting',
+  WEEDING = 'weeding',
+  MULCHING = 'mulching',
+  COVER_CROP_SEEDING = 'cover_crop_seeding',
+  SOIL_ANALYSIS = 'soil_analysis',
+  SAP_ANALYSIS = 'sap_analysis',
+  NECK_PROTECTOR = 'neck_protector',
+}
+
 const TaskTypeSchema = defineEntity({
   name: 'TaskType',
   tableName: 'task_types',

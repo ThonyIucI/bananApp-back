@@ -18,5 +18,8 @@ export enum EGaiaLiveEvent {
   QUOTA_UPDATE = 'live:quota_update',
   QUOTA_EXCEEDED = 'live:quota_exceeded',
   ACTION_CONFIRMED = 'live:action_confirmed',
+  SESSION_ENDED = 'live:session_ended',
+  // Client → Server (rating submission after session ends)
+  RATE_SESSION = 'live:rate_session',
   ERROR = 'live:error',
 }

@@ -17,7 +17,10 @@ import {
 import { GaiaQuotaService } from '../../application/gaia-quota.service';
 import { GaiaSessionContextService } from '../../application/gaia-session-context.service';
 import { GaiaQuotaExceededException } from '../../domain/exceptions/gaia-quota-exceeded.exception';
-import { GAIA_SYSTEM_PROMPT } from '../../application/gaia-system-prompt';
+import {
+  GAIA_LIVE_SYSTEM_PROMPT,
+  GAIA_SYSTEM_PROMPT,
+} from '../../application/gaia-system-prompt';
 import { WsJwtGuard } from '../../../shared/guards/ws-jwt.guard';
 import { ListMyPlotsTool } from '../../tools/read/list-my-plots.tool';
 import { GetFieldTasksTool } from '../../tools/read/get-field-tasks.tool';
@@ -39,6 +42,8 @@ interface IActiveSession {
   liveSession: ILiveSession;
   userId: string;
   startedAt: Date;
+  /** Keys of field tasks registered during this session (for rating/summary). */
+  registeredTaskKeys: string[];
 }
 
 @WebSocketGateway({
@@ -139,13 +144,13 @@ export class GaiaLiveGateway implements OnGatewayDisconnect {
     let liveSession: ILiveSession;
     try {
       liveSession = await this.llm.createLiveSession({
-        systemPrompt: GAIA_SYSTEM_PROMPT,
+        systemPrompt: GAIA_LIVE_SYSTEM_PROMPT,
         userContextBlock,
         tools: toFunctionDeclarations(this.allTools),
         onAudio: (base64) => {
-          console.log(
-            `[LIVE onAudio] Recibido audio de Gemini (${base64.length} bytes)\n`,
-          );
+          // console.log(
+          //   `[LIVE onAudio] Recibido audio de Gemini (${base64.length} bytes)\n`,
+          // );
           client.emit(EGaiaLiveEvent.AUDIO_RESPONSE, {
             audio: base64,
             mimeType: 'audio/pcm;rate=24000',
@@ -159,7 +164,7 @@ export class GaiaLiveGateway implements OnGatewayDisconnect {
         },
         onToolCall: async (name, args) => {
           console.log(
-            `[LIVE onToolCall] tool="${name}" args=${JSON.stringify(args)}\n`,
+            `[LIVE onToolCall] 📦 tool="${name}"\n${JSON.stringify(args, null, 2)}\n`,
           );
           const tool = toolMap.get(name);
           if (!tool) {
@@ -168,24 +173,40 @@ export class GaiaLiveGateway implements OnGatewayDisconnect {
           }
 
           return RequestContext.create(this.orm.em, async () => {
-            const result = await tool.execute(args, ctx);
+            try {
+              const result = await tool.execute(args, ctx);
 
-            if (this.writeToolNames.includes(name)) {
-              const confirmation = result as IToolConfirmation;
-              console.log(
-                `[LIVE onToolCall] ✅ Write tool persistido, emitiendo ACTION_CONFIRMED\n`,
-              );
-              client.emit(EGaiaLiveEvent.ACTION_CONFIRMED, {
-                humanSummary: confirmation.humanSummary,
-              });
-              return {
-                confirmed: true,
-                humanSummary: confirmation.humanSummary,
-              };
+              if (this.writeToolNames.includes(name)) {
+                const confirmation = result as IToolConfirmation;
+                console.log(
+                  `[LIVE onToolCall] ✅ Write tool persistido, emitiendo ACTION_CONFIRMED\n`,
+                );
+                const session = this.sessions.get(client.id);
+                if (session) {
+                  const taskTypeKey = args.taskTypeKey as string | undefined;
+                  if (taskTypeKey) {
+                    session.registeredTaskKeys.push(taskTypeKey);
+                  }
+                }
+                client.emit(EGaiaLiveEvent.ACTION_CONFIRMED, {
+                  humanSummary: confirmation.humanSummary,
+                });
+                return {
+                  confirmed: true,
+                  humanSummary: confirmation.humanSummary,
+                };
+              }
+
+              console.log(`[LIVE onToolCall] ✅ Read tool ejecutado\n`);
+              return result;
+            } catch (err) {
+              const msg =
+                err instanceof Error
+                  ? err.message
+                  : 'Error al ejecutar herramienta';
+              console.log(`[LIVE onToolCall] ❌ Error: ${msg}\n`);
+              return { error: msg };
             }
-
-            console.log(`[LIVE onToolCall] ✅ Read tool ejecutado\n`);
-            return result;
           });
         },
         onTurnComplete: () => {
@@ -230,6 +251,7 @@ export class GaiaLiveGateway implements OnGatewayDisconnect {
       liveSession,
       userId: user.sub,
       startedAt: new Date(),
+      registeredTaskKeys: [],
     });
     this.userSockets.set(user.sub, client.id);
     console.log(`[LIVE] 4️⃣  ✅ Sesión Gemini lista — emitiendo READY\n`);
@@ -298,9 +320,9 @@ export class GaiaLiveGateway implements OnGatewayDisconnect {
       );
       return;
     }
-    console.log(
-      `[LIVE handleAudio] Enviando audio a Gemini (${data.audio.length} bytes)\n`,
-    );
+    // console.log(
+    //   `[LIVE handleAudio] Enviando audio a Gemini (${data.audio.length} bytes)\n`,
+    // );
     session.liveSession.sendAudio(data.audio);
   }
 

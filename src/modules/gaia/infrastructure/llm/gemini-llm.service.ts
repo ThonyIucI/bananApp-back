@@ -205,7 +205,7 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
           console.log(`[GEMINI] ✅ Session ABIERTA (onopen)\n`);
         },
         onmessage: (message) => {
-          console.log(`[GEMINI] 📨 Mensaje recibido (onmessage)\n`);
+          // console.log(`[GEMINI] 📨 Mensaje recibido (onmessage)\n`);
           void this.handleLiveMessage(message, session, options);
         },
         onerror: (err) => {
@@ -254,9 +254,9 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
     const { onAudio, onText, onToolCall, onTurnComplete, onError } = options;
     try {
       if (message.serverContent?.modelTurn?.parts) {
-        console.log(
-          `[GEMINI handleLiveMessage] modelTurn con ${message.serverContent.modelTurn.parts.length} parts\n`,
-        );
+        // console.log(
+        //   `[GEMINI handleLiveMessage] modelTurn con ${message.serverContent.modelTurn.parts.length} parts\n`,
+        // );
         for (const part of message.serverContent.modelTurn.parts) {
           if (part.text) {
             console.log(
@@ -265,9 +265,9 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
             onText(part.text, false);
           }
           if (part.inlineData?.data) {
-            console.log(
-              `[GEMINI handleLiveMessage] 🔊 Audio: ${part.inlineData.data.length} bytes\n`,
-            );
+            // console.log(
+            //   `[GEMINI handleLiveMessage] 🔊 Audio: ${part.inlineData.data.length} bytes\n`,
+            // );
             onAudio(part.inlineData.data);
           }
         }
@@ -278,10 +278,12 @@ export class GeminiLLMService implements ILLMService, OnModuleInit {
         onTurnComplete();
       }
 
+      console.log('[FUNCTION CALLS]', message?.toolCall?.functionCalls);
       if (message.toolCall?.functionCalls) {
-        console.log(
-          `[GEMINI handleLiveMessage] 🛠️  ${message.toolCall.functionCalls.length} tool calls\n`,
-        );
+        // console.log(
+        //   `[GEMINI handleLiveMessage] 🛠️  ${message.toolCall.functionCalls.length} tool calls\n`,
+        // );
+
         for (const fc of message.toolCall.functionCalls) {
           console.log(
             `[GEMINI handleLiveMessage] → Ejecutando tool: ${fc.name}\n`,
