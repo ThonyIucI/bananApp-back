@@ -1,4 +1,4 @@
-import { EDetailValueType } from '../domain/task-type-detail-schema.entity';
+import { EDetailValueType } from '../entities/task-type-detail-schema.entity';
 import { TSeedTaskType } from './seed-types';
 
 /** Task types specific to banana and other perennial crops (labores culturales + calidad preventiva + resiembra). */

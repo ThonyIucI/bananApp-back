@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Type } from '@google/genai';
 import { EGaiaToolName, IToolConfirmation } from '../gaia-tool.types';
 import type { IGaiaTool, IGaiaToolContext } from '../gaia-tool.types';
-import { CreateFieldTaskHandler } from '../../../field-tasks/commands/create-field-task.handler';
+import { CreateFieldTaskService } from '../../../field-tasks/services/create-field-task.service';
 import { formatDateTime, getWeekOfYear } from '../../../shared/utils/date.util';
 
 const buildHumanSummary = (
@@ -67,7 +67,7 @@ export class RegisterFieldTaskTool implements IGaiaTool {
     },
   };
 
-  constructor(private readonly createFieldTask: CreateFieldTaskHandler) {}
+  constructor(private readonly createFieldTask: CreateFieldTaskService) {}
 
   async execute(
     args: Record<string, unknown>,

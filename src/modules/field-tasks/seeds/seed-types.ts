@@ -1,4 +1,4 @@
-import { EDetailValueType } from '../domain/task-type-detail-schema.entity';
+import { EDetailValueType } from '../entities/task-type-detail-schema.entity';
 
 export type TSeedOption = {
   key: string;

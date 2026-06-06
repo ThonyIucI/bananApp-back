@@ -1,4 +1,4 @@
-import { FieldTask } from './field-task.entity';
+import { FieldTask } from '../entities/field-task.entity';
 
 export interface TFieldTaskFilters {
   plotId?: string;
@@ -13,7 +13,7 @@ export interface TFieldTaskFilters {
 
 export abstract class IFieldTaskRepository {
   abstract findById(id: string): Promise<FieldTask | null>;
-  abstract findAll(filters?: TFieldTaskFilters): Promise<{ items: FieldTask[]; total: number }>;
+  abstract findAll(filters?: TFieldTaskFilters): Promise<[FieldTask[], number]>;
   abstract persist(task: FieldTask): void;
   abstract persistDetails(task: FieldTask): void;
   abstract remove(task: FieldTask): void;

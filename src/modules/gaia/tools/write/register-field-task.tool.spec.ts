@@ -14,7 +14,7 @@ jest.mock('@mikro-orm/core', () => {
 });
 
 import { RegisterFieldTaskTool } from './register-field-task.tool';
-import { CreateFieldTaskHandler } from '../../../field-tasks/commands/create-field-task.handler';
+import { CreateFieldTaskService } from '../../../field-tasks/services/create-field-task.service';
 import type { IGaiaToolContext } from '../gaia-tool.types';
 
 const mockCtx = (): IGaiaToolContext => ({
@@ -30,11 +30,11 @@ const baseArgs = {
 
 describe('RegisterFieldTaskTool', () => {
   let tool: RegisterFieldTaskTool;
-  let mockHandler: jest.Mocked<Pick<CreateFieldTaskHandler, 'execute'>>;
+  let mockHandler: jest.Mocked<Pick<CreateFieldTaskService, 'execute'>>;
 
   beforeEach(() => {
     mockHandler = { execute: jest.fn().mockResolvedValue({}) };
-    tool = new RegisterFieldTaskTool(mockHandler as unknown as CreateFieldTaskHandler);
+    tool = new RegisterFieldTaskTool(mockHandler as unknown as CreateFieldTaskService);
   });
 
   it('persiste directamente y devuelve confirmed:true', async () => {

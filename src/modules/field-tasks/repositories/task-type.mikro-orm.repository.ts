@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { TaskType } from '../domain/task-type.entity';
-import { ITaskTypeRepository } from '../domain/task-type.repository';
+import { TaskType } from '../entities/task-type.entity';
+import { ITaskTypeRepository } from './task-type.repository';
 
 const DETAIL_POPULATE = [
   'detailSchemas',

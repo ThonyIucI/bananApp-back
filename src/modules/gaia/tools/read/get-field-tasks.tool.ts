@@ -7,7 +7,7 @@ import type {
   IGaiaToolContext,
   TGaiaToolResult,
 } from '../gaia-tool.types';
-import { FieldTask } from '../../../field-tasks/domain/field-task.entity';
+import { FieldTask } from '../../../field-tasks/entities/field-task.entity';
 
 type TPeriod = 'today' | 'week' | 'month';
 

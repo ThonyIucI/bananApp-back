@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { IFieldTaskRepository } from '../domain/field-task.repository';
+import { IFieldTaskRepository } from '../repositories/field-task.repository';
 import { NotFoundException } from '../../shared/exceptions/domain.exception';
 
 @Injectable()
-export class DeleteFieldTaskHandler {
+export class DeleteFieldTaskService {
   constructor(private readonly fieldTaskRepo: IFieldTaskRepository) {}
 
   async execute(id: string): Promise<void> {

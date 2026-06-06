@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { CropType } from '../crop-types/domain/crop-type.entity';
-import { TaskType } from './domain/task-type.entity';
-import { TaskTypeDetailSchema } from './domain/task-type-detail-schema.entity';
-import { TaskTypeDetailOption } from './domain/task-type-detail-option.entity';
+import { TaskType } from './entities/task-type.entity';
+import { TaskTypeDetailSchema } from './entities/task-type-detail-schema.entity';
+import { TaskTypeDetailOption } from './entities/task-type-detail-option.entity';
 import { TSeedTaskType } from './seeds/seed-types';
 import { TRANSVERSAL_TASK_TYPES } from './seeds/transversal-task-types';
 import { BANANA_TASK_TYPES } from './seeds/banana-task-types';

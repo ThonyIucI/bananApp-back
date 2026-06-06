@@ -1,4 +1,4 @@
-import { TaskType } from './task-type.entity';
+import { TaskType } from '../entities/task-type.entity';
 
 export abstract class ITaskTypeRepository {
   abstract findByKey(key: string): Promise<TaskType | null>;

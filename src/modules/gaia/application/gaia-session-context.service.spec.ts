@@ -3,12 +3,12 @@ import { GaiaSessionContextService } from './gaia-session-context.service';
 import { ListPlotsHandler } from '../../plots/queries/list-plots.handler';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { Collection } from '@mikro-orm/core';
-import { TaskType } from '../../field-tasks/domain/task-type.entity';
+import { TaskType } from '../../field-tasks/entities/task-type.entity';
 import {
   EDetailValueType,
   TaskTypeDetailSchema,
-} from '../../field-tasks/domain/task-type-detail-schema.entity';
-import { TaskTypeDetailOption } from '../../field-tasks/domain/task-type-detail-option.entity';
+} from '../../field-tasks/entities/task-type-detail-schema.entity';
+import { TaskTypeDetailOption } from '../../field-tasks/entities/task-type-detail-option.entity';
 import { CropType } from '../../crop-types/domain/crop-type.entity';
 
 const mockCollection = <T extends object>(items: T[]) =>

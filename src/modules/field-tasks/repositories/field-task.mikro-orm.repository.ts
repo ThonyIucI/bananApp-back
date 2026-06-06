@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { FieldTask } from '../domain/field-task.entity';
+import { FieldTask } from '../entities/field-task.entity';
 import {
   IFieldTaskRepository,
   TFieldTaskFilters,
-} from '../domain/field-task.repository';
+} from './field-task.repository';
 
 @Injectable()
 export class MikroOrmFieldTaskRepository extends IFieldTaskRepository {
@@ -30,9 +30,7 @@ export class MikroOrmFieldTaskRepository extends IFieldTaskRepository {
     );
   }
 
-  async findAll(
-    filters: TFieldTaskFilters = {},
-  ): Promise<{ items: FieldTask[]; total: number }> {
+  findAll(filters: TFieldTaskFilters = {}): Promise<[FieldTask[], number]> {
     const where: Record<string, unknown> = { deletedAt: null };
 
     if (filters.plotId) where['plot'] = { id: filters.plotId };
@@ -48,17 +46,12 @@ export class MikroOrmFieldTaskRepository extends IFieldTaskRepository {
       where['performedAt'] = dateFilter;
     }
 
-    const limit = filters.limit ?? 20;
-    const offset = filters.offset ?? 0;
-
-    const [items, total] = await this.em.findAndCount(FieldTask, where, {
-      populate: ['plot', 'subPlot', 'taskType', 'performedByUser', 'details'],
+    return this.em.findAndCount(FieldTask, where, {
+      populate: ['plot', 'taskType', 'details'],
       orderBy: { performedAt: 'DESC' },
-      limit,
-      offset,
+      limit: filters.limit,
+      offset: filters.offset,
     });
-
-    return { items, total };
   }
 
   persist(task: FieldTask): void {

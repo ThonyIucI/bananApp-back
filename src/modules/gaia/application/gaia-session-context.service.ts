@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/postgresql';
-import { TaskType } from '../../field-tasks/domain/task-type.entity';
+import { TaskType } from '../../field-tasks/entities/task-type.entity';
 import {
   EDetailValueType,
   TaskTypeDetailSchema,
-} from '../../field-tasks/domain/task-type-detail-schema.entity';
+} from '../../field-tasks/entities/task-type-detail-schema.entity';
 import { ListPlotsHandler } from '../../plots/queries/list-plots.handler';
 import { PlotLookupDto } from '../../plots/domain/plot.mapper';
 import { User } from '../../users/domain/user.entity';
