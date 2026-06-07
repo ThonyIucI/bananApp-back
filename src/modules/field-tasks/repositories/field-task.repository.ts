@@ -2,6 +2,8 @@ import { FieldTask } from '../entities/field-task.entity';
 
 export interface TFieldTaskFilters {
   plotId?: string;
+  /** Filtrar por múltiples parcelas (usa $in). Tiene precedencia sobre plotId. */
+  plotIds?: string[];
   subPlotId?: string;
   taskTypeKey?: string;
   performedByUserId?: string;

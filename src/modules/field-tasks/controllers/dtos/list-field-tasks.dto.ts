@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsDateString,
   IsInt,
   IsOptional,
@@ -10,6 +11,11 @@ import {
 import { Type } from 'class-transformer';
 
 export class ListFieldTasksDto {
+  @IsOptional()
+  @IsArray()
+  @IsUUID('all', { each: true })
+  plotIds?: string[];
+
   @IsOptional()
   @IsUUID()
   subPlotId?: string;

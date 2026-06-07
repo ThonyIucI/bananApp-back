@@ -1,5 +1,12 @@
 @../planning/rules.md
 
+# Arquitectura de módulo (OBLIGATORIO leer antes de crear/refactorizar un módulo)
+
+Patrón canónico: `planning/patterns/backend/module.md`. Define la estructura
+`controller → service → repository → entity` + capa de `resources/` (salida), un service por
+funcionalidad, paginación `{ data, meta }`, y los `ApiResource` compartidos en
+`src/modules/shared/resources/`. Módulo de referencia: `field-tasks`.
+
 # Backend Knowledge Graph
 
 Consulta `graphify-out/GRAPH_REPORT.md` para navegar el grafo de dependencias.

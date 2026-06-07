@@ -38,6 +38,7 @@ const FIELD_TASK_ROUTES = {
   TASK_TYPES: 'task-types',
   CREATE: 'plots/:plotId/field-tasks',
   LIST_BY_PLOT: 'plots/:plotId/field-tasks',
+  LIST_ALL: 'field-tasks',
   DETAIL: 'field-tasks/:id',
 };
 
@@ -91,6 +92,28 @@ export class FieldTasksController {
     return fieldTaskResource.toItem(fieldTask);
   }
 
+  @Get(FIELD_TASK_ROUTES.LIST_ALL)
+  @RequirePermission('field_task_list')
+  async listAll(
+    @Query() query: ListFieldTasksDto,
+  ): Promise<IPaginatedData<IFieldTaskResource>> {
+    const limit = query.limit ?? FIELD_TASK_LIST_DEFAULTS.limit;
+    const offset = query.offset ?? FIELD_TASK_LIST_DEFAULTS.offset;
+
+    const [fieldTasks, total] = await this.listService.execute({
+      plotIds: query.plotIds,
+      subPlotId: query.subPlotId,
+      taskTypeKey: query.taskTypeKey,
+      performedByUserId: query.performedByUserId,
+      from: query.from ? new Date(query.from) : undefined,
+      to: query.to ? new Date(query.to) : undefined,
+      limit,
+      offset,
+    });
+
+    return fieldTaskResource.toPaginated(fieldTasks, { total, limit, offset });
+  }
+
   @Get(FIELD_TASK_ROUTES.LIST_BY_PLOT)
   @RequirePermission('field_task_list')
   async list(
@@ -101,7 +124,7 @@ export class FieldTasksController {
     const offset = query.offset ?? FIELD_TASK_LIST_DEFAULTS.offset;
 
     const [fieldTasks, total] = await this.listService.execute({
-      // plotId, // se mantiene sin filtrar por parcela (comportamiento previo)
+      plotId,
       subPlotId: query.subPlotId,
       taskTypeKey: query.taskTypeKey,
       performedByUserId: query.performedByUserId,

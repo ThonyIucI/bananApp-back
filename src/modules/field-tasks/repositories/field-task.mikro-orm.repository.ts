@@ -30,27 +30,40 @@ export class MikroOrmFieldTaskRepository extends IFieldTaskRepository {
     );
   }
 
-  findAll(filters: TFieldTaskFilters = {}): Promise<[FieldTask[], number]> {
+  findAll({
+    plotId,
+    plotIds,
+    subPlotId,
+    taskTypeKey,
+    from,
+    to,
+    limit,
+    offset,
+  }: TFieldTaskFilters = {}): Promise<[FieldTask[], number]> {
     const where: Record<string, unknown> = { deletedAt: null };
 
-    if (filters.plotId) where['plot'] = { id: filters.plotId };
-    if (filters.subPlotId) where['subPlot'] = { id: filters.subPlotId };
-    if (filters.taskTypeKey) where['taskType'] = { key: filters.taskTypeKey };
-    if (filters.performedByUserId)
-      where['performedByUser'] = { id: filters.performedByUserId };
+    const resolvedPlotIds = Array.isArray(plotIds) ? plotIds : [];
+    if (resolvedPlotIds.length > 0) {
+      where['plot'] = { id: { $in: resolvedPlotIds } };
+    } else if (plotId) {
+      where['plot'] = { id: plotId };
+    }
 
-    if (filters.from || filters.to) {
+    if (subPlotId) where['subPlot'] = { id: subPlotId };
+    if (taskTypeKey) where['taskType'] = { key: taskTypeKey };
+
+    if (from || to) {
       const dateFilter: Record<string, Date> = {};
-      if (filters.from) dateFilter['$gte'] = filters.from;
-      if (filters.to) dateFilter['$lte'] = filters.to;
+      if (from) dateFilter['$gte'] = from;
+      if (to) dateFilter['$lte'] = to;
       where['performedAt'] = dateFilter;
     }
 
     return this.em.findAndCount(FieldTask, where, {
       populate: ['plot', 'taskType', 'details'],
       orderBy: { performedAt: 'DESC' },
-      limit: filters.limit,
-      offset: filters.offset,
+      limit,
+      offset,
     });
   }
 
